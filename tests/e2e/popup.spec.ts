@@ -300,6 +300,83 @@ test('Chrome action on a restricted tab leaves content empty and does not enable
   });
 });
 
+test('shares the GitHub project from an unpacked build using Chromium’s clipboard', async ({ extension, headless }) => {
+  test.skip(!headless, 'Headless Chromium isolates its clipboard from the operating system.');
+  const popup = await openPopup(extension);
+  await content(popup).fill(fixtureUrl);
+  const share = popup.getByRole('button', { name: 'Share extension', exact: true });
+  await expect(share).toBeEnabled();
+  await expect(popup.getByRole('link', { name: 'Rate on Chrome Web Store', exact: true })).toHaveCount(0);
+
+  await share.click();
+  await expect(popup.getByText('Share link copied.', { exact: true })).toBeVisible();
+  await expect(content(popup)).toHaveValue(fixtureUrl);
+
+  // Grant read access after the click so the extension writes with its shipped permissions.
+  await extension.context.grantPermissions(['clipboard-read']);
+  expect(await popup.evaluate(async () =>
+    await navigator.clipboard.readText() === 'https://github.com/fenghuashao/FToolset',
+  )).toBe(true);
+});
+
+test('links to store reviews and shares the listing with a manual-copy fallback', async ({ extension }) => {
+  const itemId = 'abcdefghijklmnopabcdefghijklmnop';
+  const listingUrl = `https://chromewebstore.google.com/detail/${itemId}`;
+
+  const popup = await extension.context.newPage();
+  await popup.setViewportSize({ width: 400, height: 600 });
+  await popup.addInitScript((id) => {
+    const metadata = new Promise((resolve) => {
+      window.addEventListener('resolve-store-metadata', () => resolve({
+        id,
+        installType: 'normal',
+        updateUrl: 'https://clients2.google.com/service/update2/crx',
+      }), { once: true });
+    });
+    Object.defineProperty(chrome.management, 'getSelf', { value: () => metadata });
+
+    let firstWrite = true;
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+      value: async (text: string) => {
+        if (firstWrite) {
+          firstWrite = false;
+          throw new DOMException('Clipboard blocked for this attempt.', 'NotAllowedError');
+        }
+        document.documentElement.dataset.copiedShareLink = text;
+      },
+    });
+  }, itemId);
+  await popup.goto(extension.popupUrl);
+
+  const share = popup.getByRole('button', { name: 'Share extension', exact: true });
+  await expect(share).toBeDisabled();
+  await popup.evaluate(() => { window.dispatchEvent(new Event('resolve-store-metadata')); });
+  await expect(share).toBeEnabled();
+  await content(popup).fill(qrText);
+  await expect(preview(popup)).toBeVisible();
+
+  const rate = popup.getByRole('link', { name: 'Rate on Chrome Web Store', exact: true });
+  await expect(rate).toBeInViewport({ ratio: 1 });
+  await expect(share).toBeInViewport({ ratio: 1 });
+  await expect(rate).toHaveAttribute('href', `${listingUrl}/reviews`);
+  await expect(rate).toHaveAttribute('target', '_blank');
+  await expect(rate).toHaveAttribute('rel', /\bnoopener\b/);
+
+  await share.click();
+  await expect(popup.getByText('Copy the link below to share FToolset.', { exact: true })).toBeVisible();
+  const manualCopy = popup.getByRole('textbox', { name: 'Extension share link', exact: true });
+  await expect(manualCopy).toHaveValue(listingUrl);
+  await expect(manualCopy).toHaveJSProperty('readOnly', true);
+  await expect(manualCopy).toBeFocused();
+  expect(await manualCopy.evaluate((input: HTMLInputElement) => [input.selectionStart, input.selectionEnd]))
+    .toEqual([0, listingUrl.length]);
+
+  await share.click();
+  await expect(popup.getByText('Share link copied.', { exact: true })).toBeVisible();
+  await expect(popup.locator('html')).toHaveAttribute('data-copied-share-link', listingUrl);
+  await expect(manualCopy).toBeHidden();
+});
+
 test('uploads and removes a logo and sends decodable PNG bytes to the Clipboard API boundary', async ({ extension }) => {
   const popup = await extension.context.newPage();
   // Capture write() locally so the test does not touch the system clipboard.

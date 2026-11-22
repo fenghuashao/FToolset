@@ -4,6 +4,7 @@ import { t } from '../../src/shared/i18n';
 import { consumePendingLaunch, getShareablePageUrl, lastToolIdKey } from '../../src/shared/launch';
 import { getTool, searchTools } from '../../src/tools/registry';
 import { ErrorBoundary } from './ErrorBoundary';
+import { PopupToolbar } from './PopupToolbar';
 
 interface PopupState {
   toolId: string;
@@ -64,11 +65,7 @@ export function App() {
         className="border-b border-line bg-surface"
         onKeyDown={(event) => { if (event.key === 'Escape' && pickerOpen) closePicker(); }}
       >
-        <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-          <div className="flex items-center gap-2.5">
-            <img alt="" width="28" height="28" src="/icon/32.png" />
-            <span className="text-base font-bold tracking-tight">{t('extensionName')}</span>
-          </div>
+        <PopupToolbar>
           <button
             className="button"
             type="button"
@@ -82,7 +79,7 @@ export function App() {
             {t('tools')}
             <Icon name="chevrons" size={14} />
           </button>
-        </div>
+        </PopupToolbar>
         <div id="tool-picker" hidden={!pickerOpen} className="border-t border-line px-4 py-3">
           {pickerOpen && (
             <>

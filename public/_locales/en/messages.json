@@ -8,6 +8,27 @@
   "extensionDescription": {
     "message": "Generate QR codes from the current tab, a link, or text. Customize, copy, and export PNG or SVG entirely offline."
   },
+  "rateExtension": {
+    "message": "Rate on Chrome Web Store"
+  },
+  "rateExtensionShort": {
+    "message": "Rate"
+  },
+  "shareExtension": {
+    "message": "Share extension"
+  },
+  "shareExtensionShort": {
+    "message": "Share"
+  },
+  "shareLink": {
+    "message": "Extension share link"
+  },
+  "shareLinkCopied": {
+    "message": "Share link copied."
+  },
+  "shareLinkManual": {
+    "message": "Copy the link below to share FToolset."
+  },
   "toolQrName": {
     "message": "QR code generator"
   },

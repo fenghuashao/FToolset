@@ -8,6 +8,27 @@
   "extensionDescription": {
     "message": "离线将当前网页、链接或文本生成二维码。支持自定义样式与中心图标，复制 PNG 或下载 PNG、SVG。"
   },
+  "rateExtension": {
+    "message": "去商店评分"
+  },
+  "rateExtensionShort": {
+    "message": "评分"
+  },
+  "shareExtension": {
+    "message": "分享扩展"
+  },
+  "shareExtensionShort": {
+    "message": "分享"
+  },
+  "shareLink": {
+    "message": "扩展分享链接"
+  },
+  "shareLinkCopied": {
+    "message": "已复制分享链接。"
+  },
+  "shareLinkManual": {
+    "message": "请手动复制下方链接来分享 FToolset。"
+  },
   "toolQrName": {
     "message": "二维码生成器"
   },

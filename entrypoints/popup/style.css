@@ -69,7 +69,7 @@
     @apply inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-semibold text-ink;
   }
 
-  .button:hover:enabled, .button[aria-expanded='true'], .button[aria-pressed='true'] {
+  .button:hover:enabled, .button:any-link:hover, .button[aria-expanded='true'], .button[aria-pressed='true'] {
     @apply border-accent bg-tint text-accent;
   }
 

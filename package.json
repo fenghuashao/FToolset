@@ -1,6 +1,6 @@
 {
   "name": "ftoolset",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "An offline Chrome toolset, starting with a QR code generator.",
