@@ -1,0 +1,143 @@
+{
+  "localeCode": {
+    "message": "en"
+  },
+  "extensionName": {
+    "message": "FToolset"
+  },
+  "extensionDescription": {
+    "message": "Generate QR codes from the current tab, a link, or text. Customize, copy, and export PNG or SVG entirely offline."
+  },
+  "toolQrName": {
+    "message": "QR code generator"
+  },
+  "toolQrDescription": {
+    "message": "Turn a link or text into a QR code."
+  },
+  "tools": {
+    "message": "Tools"
+  },
+  "searchTools": {
+    "message": "Search tools"
+  },
+  "noTools": {
+    "message": "No matching tools."
+  },
+  "loadingTool": {
+    "message": "Loading tool…"
+  },
+  "toolError": {
+    "message": "This tool could not open."
+  },
+  "reload": {
+    "message": "Reload"
+  },
+  "menuSelection": {
+    "message": "Make a QR code from selected text"
+  },
+  "menuLink": {
+    "message": "Make a QR code from this link"
+  },
+  "qrContent": {
+    "message": "Content"
+  },
+  "qrContentPlaceholder": {
+    "message": "Enter a URL or text"
+  },
+  "qrClear": {
+    "message": "Clear"
+  },
+  "qrRestore": {
+    "message": "Restore current URL"
+  },
+  "qrPreview": {
+    "message": "QR code preview"
+  },
+  "qrEmpty": {
+    "message": "Enter content to generate a QR code."
+  },
+  "qrGenerating": {
+    "message": "Generating QR code…"
+  },
+  "qrStyling": {
+    "message": "Style and logo"
+  },
+  "qrCorrection": {
+    "message": "Error correction"
+  },
+  "qrDotStyle": {
+    "message": "Dot style"
+  },
+  "qrSquare": {
+    "message": "Square"
+  },
+  "qrDots": {
+    "message": "Dots"
+  },
+  "qrRounded": {
+    "message": "Rounded"
+  },
+  "qrClassy": {
+    "message": "Classy"
+  },
+  "qrForeground": {
+    "message": "Foreground"
+  },
+  "qrBackground": {
+    "message": "Background"
+  },
+  "qrResetColors": {
+    "message": "Reset colors"
+  },
+  "qrLogo": {
+    "message": "Logo"
+  },
+  "qrUploadLogo": {
+    "message": "Upload logo"
+  },
+  "qrRemoveLogo": {
+    "message": "Remove logo"
+  },
+  "qrLogoHelp": {
+    "message": "PNG, JPG, or SVG · up to 4 MB"
+  },
+  "qrLogoAutoH": {
+    "message": "Error correction was set to H for the logo."
+  },
+  "qrLogoTypeError": {
+    "message": "Choose a PNG, JPG, or SVG image."
+  },
+  "qrLogoSizeError": {
+    "message": "Choose an image smaller than 4 MB and up to 4096 × 4096 pixels."
+  },
+  "qrLogoReadError": {
+    "message": "Could not open this image. Try a different file."
+  },
+  "qrCopyPng": {
+    "message": "Copy PNG"
+  },
+  "qrDownloadPng": {
+    "message": "PNG"
+  },
+  "qrDownloadSvg": {
+    "message": "SVG"
+  },
+  "qrExport": {
+    "message": "Download QR code"
+  },
+  "qrCopySuccess": {
+    "message": "PNG copied to clipboard."
+  },
+  "qrCopyError": {
+    "message": "Could not copy the PNG. Download it instead."
+  },
+  "qrCapacityError": {
+    "message": "Content is too long for this correction level. Shorten it or select a lower level."
+  },
+  "qrRenderError": {
+    "message": "Could not generate the QR code. Try changing the content or removing the logo."
+  },
+  "qrDownloadError": {
+    "message": "Could not download the QR code. Please try again."
+  }
+}

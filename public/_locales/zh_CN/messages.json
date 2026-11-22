@@ -1,0 +1,143 @@
+{
+  "localeCode": {
+    "message": "zh-CN"
+  },
+  "extensionName": {
+    "message": "FToolset"
+  },
+  "extensionDescription": {
+    "message": "离线将当前网页、链接或文本生成二维码。支持自定义样式与中心图标，复制 PNG 或下载 PNG、SVG。"
+  },
+  "toolQrName": {
+    "message": "二维码生成器"
+  },
+  "toolQrDescription": {
+    "message": "把链接或文本转换为二维码。"
+  },
+  "tools": {
+    "message": "工具"
+  },
+  "searchTools": {
+    "message": "搜索工具"
+  },
+  "noTools": {
+    "message": "没有找到匹配的工具。"
+  },
+  "loadingTool": {
+    "message": "正在加载工具…"
+  },
+  "toolError": {
+    "message": "无法打开此工具。"
+  },
+  "reload": {
+    "message": "重新加载"
+  },
+  "menuSelection": {
+    "message": "将所选文本生成二维码"
+  },
+  "menuLink": {
+    "message": "将此链接生成二维码"
+  },
+  "qrContent": {
+    "message": "内容"
+  },
+  "qrContentPlaceholder": {
+    "message": "输入链接或文本"
+  },
+  "qrClear": {
+    "message": "清空"
+  },
+  "qrRestore": {
+    "message": "恢复当前网页链接"
+  },
+  "qrPreview": {
+    "message": "二维码预览"
+  },
+  "qrEmpty": {
+    "message": "输入内容后生成二维码。"
+  },
+  "qrGenerating": {
+    "message": "正在生成二维码…"
+  },
+  "qrStyling": {
+    "message": "样式与图标"
+  },
+  "qrCorrection": {
+    "message": "纠错等级"
+  },
+  "qrDotStyle": {
+    "message": "码点样式"
+  },
+  "qrSquare": {
+    "message": "方形"
+  },
+  "qrDots": {
+    "message": "圆点"
+  },
+  "qrRounded": {
+    "message": "圆角"
+  },
+  "qrClassy": {
+    "message": "复古"
+  },
+  "qrForeground": {
+    "message": "前景色"
+  },
+  "qrBackground": {
+    "message": "背景色"
+  },
+  "qrResetColors": {
+    "message": "重置颜色"
+  },
+  "qrLogo": {
+    "message": "图标"
+  },
+  "qrUploadLogo": {
+    "message": "上传图标"
+  },
+  "qrRemoveLogo": {
+    "message": "移除图标"
+  },
+  "qrLogoHelp": {
+    "message": "PNG、JPG 或 SVG，最大 4 MB"
+  },
+  "qrLogoAutoH": {
+    "message": "已为图标将纠错等级调至 H。"
+  },
+  "qrLogoTypeError": {
+    "message": "请选择 PNG、JPG 或 SVG 图片。"
+  },
+  "qrLogoSizeError": {
+    "message": "请选择不超过 4 MB、宽高各不超过 4096 像素的图片。"
+  },
+  "qrLogoReadError": {
+    "message": "无法打开此图片，请换一个文件。"
+  },
+  "qrCopyPng": {
+    "message": "复制 PNG"
+  },
+  "qrDownloadPng": {
+    "message": "PNG"
+  },
+  "qrDownloadSvg": {
+    "message": "SVG"
+  },
+  "qrExport": {
+    "message": "下载二维码"
+  },
+  "qrCopySuccess": {
+    "message": "已复制 PNG 到剪贴板。"
+  },
+  "qrCopyError": {
+    "message": "无法复制 PNG，可以下载图片。"
+  },
+  "qrCapacityError": {
+    "message": "内容超出当前纠错等级的容量。请缩短内容或调低等级。"
+  },
+  "qrRenderError": {
+    "message": "无法生成二维码，请尝试修改内容或移除图标。"
+  },
+  "qrDownloadError": {
+    "message": "无法下载二维码，请重试。"
+  }
+}
