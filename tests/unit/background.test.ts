@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import background from '../../entrypoints/background';
 import { consumePendingLaunchMessage, pendingLaunchKey, type ToolLaunch } from '../../src/shared/launch';
-import { qrToolId } from '../../src/shared/qr-id';
+import { TOOL_IDS } from '../../src/shared/tool-ids';
 
 async function startBackground() {
   const installed = vi.fn<(listener: () => void) => void>();
@@ -47,41 +47,49 @@ async function startBackground() {
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe('QR context menus', () => {
-  it('registers distinct localized actions for selections and links', async () => {
+describe('multi-tool context menus', () => {
+  it('registers distinct localized actions for selections and links across tools', async () => {
     const { create, install } = await startBackground();
     install();
 
     expect(create.mock.calls.map(([menu]) => menu)).toEqual([
       { id: 'qr-from-selection', title: 'menuSelection', contexts: ['selection'] },
+      { id: 'text-from-selection', title: 'menuCleanText', contexts: ['selection'] },
       { id: 'qr-from-link', title: 'menuLink', contexts: ['link'] },
+      { id: 'clean-from-link', title: 'menuCleanLink', contexts: ['link'] },
     ]);
   });
 
-  it('keeps the intended content available for one toolbar opening after openPopup rejects', async () => {
+  it('routes link and selection menu clicks to their target tools when openPopup rejects', async () => {
     const { openPopup, items, click, consume } = await startBackground();
     click({
-      menuItemId: 'qr-from-link',
-      linkUrl: 'https://example.com/',
+      menuItemId: 'clean-from-link',
+      linkUrl: 'https://example.com/?utm_source=test',
       selectionText: 'Nearby selection',
       editable: false,
     });
 
     await vi.waitFor(() => expect(openPopup).toHaveBeenCalledOnce());
-    expect(items[pendingLaunchKey]).toBe('https://example.com/');
-    await expect(consume()).resolves.toEqual({ toolId: qrToolId, text: 'https://example.com/' });
+    expect(items[pendingLaunchKey]).toEqual({
+      toolId: TOOL_IDS.linkCleaner,
+      text: 'https://example.com/?utm_source=test',
+    });
+    await expect(consume()).resolves.toEqual({
+      toolId: TOOL_IDS.linkCleaner,
+      text: 'https://example.com/?utm_source=test',
+    });
     expect(items).not.toHaveProperty(pendingLaunchKey);
     await expect(consume()).resolves.toBeNull();
   });
 
-  it('serializes a consume with a newer menu click', async () => {
+  it('serializes a consume with a newer menu click for another tool', async () => {
     const { click, consume } = await startBackground();
     click({ menuItemId: 'qr-from-selection', selectionText: 'first', editable: false });
     const first = consume();
-    click({ menuItemId: 'qr-from-selection', selectionText: 'second', editable: false });
+    click({ menuItemId: 'text-from-selection', selectionText: 'second', editable: false });
 
-    await expect(first).resolves.toEqual({ toolId: qrToolId, text: 'first' });
-    await expect(consume()).resolves.toEqual({ toolId: qrToolId, text: 'second' });
+    await expect(first).resolves.toEqual({ toolId: TOOL_IDS.qrCode, text: 'first' });
+    await expect(consume()).resolves.toEqual({ toolId: TOOL_IDS.textCleaner, text: 'second' });
     await expect(consume()).resolves.toBeNull();
   });
 });

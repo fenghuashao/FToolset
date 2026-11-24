@@ -256,15 +256,15 @@ test('Chrome action grants activeTab, prioritizes the latest queued text, and re
   const latest = '最新选中的文字';
   // Seed the same session slot used by the browser context menu. Consumption uses the real worker.
   await extension.worker.evaluate(async (text) => {
-    await chrome.storage.session.set({ pendingQrText: 'earlier context-menu text' });
-    await chrome.storage.session.set({ pendingQrText: text });
+    await chrome.storage.session.set({ pendingToolLaunch: { toolId: 'qr-code', text: 'earlier context-menu text' } });
+    await chrome.storage.session.set({ pendingToolLaunch: { toolId: 'qr-code', text } });
   }, latest);
 
   await withBrowserAction(extension, tab, async (evaluate) => {
     const getContent = () => evaluate(() => document.querySelector('textarea')?.value ?? null);
     await expect.poll(getContent).toBe(latest);
     await expect.poll(activeUrl).toBe(fixtureUrl);
-    expect(await extension.worker.evaluate(() => chrome.storage.session.get('pendingQrText'))).toEqual({});
+    expect(await extension.worker.evaluate(() => chrome.storage.session.get('pendingToolLaunch'))).toEqual({});
     await evaluate(() => {
       const button = Array.from(document.querySelectorAll('button'))
         .find((item) => item.textContent?.trim() === 'Restore current URL');
@@ -435,4 +435,137 @@ test.describe('Chinese locale and dark mode', () => {
     await popup.emulateMedia({ colorScheme: 'dark' });
     await expect.poll(background).toBe(darkBackground);
   });
+});
+
+test('preserves minimal permissions and strict offline CSP in production manifest', async () => {
+  const manifest = JSON.parse(await readFile(join(extensionDir, 'manifest.json'), 'utf8'));
+  expect(manifest.permissions).toEqual(['activeTab', 'storage', 'contextMenus']);
+  expect(manifest.host_permissions).toBeUndefined();
+  expect(manifest.content_security_policy?.extension_pages).toContain("connect-src 'none'");
+});
+
+test('keeps quick tool bar off by default and persists when enabled locally', async ({ extension }) => {
+  const popup = await openPopup(extension);
+  await popup.setViewportSize({ width: 400, height: 600 });
+
+  await expect(popup.getByRole('navigation', { name: 'Quick tool switcher', exact: true })).toHaveCount(0);
+  await popup.getByRole('button', { name: 'Tools', exact: true }).click();
+  const toggle = popup.getByRole('checkbox', { name: 'Show quick tool bar', exact: true });
+  await expect(toggle).not.toBeChecked();
+  await toggle.check();
+
+  const quickNav = popup.getByRole('navigation', { name: 'Quick tool switcher', exact: true });
+  await expect(quickNav).toBeVisible();
+  await expect.poll(() => popup.evaluate(() => document.body.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+
+  await quickNav.getByRole('button', { name: 'Link', exact: true }).click();
+  await expect(popup.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
+
+  const reopened = await openPopup(extension);
+  await expect(reopened.getByRole('navigation', { name: 'Quick tool switcher', exact: true })).toBeVisible();
+  await expect(reopened.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
+});
+
+test('decodes QR images offline, allows safe links only, and rejects non-QR images', async ({ extension }) => {
+  const popup = await openPopup(extension);
+  await popup.setViewportSize({ width: 400, height: 600 });
+
+  // Generate a real HTTPS QR PNG and a javascript: QR PNG using the extension itself.
+  await content(popup).fill(qrText);
+  await expect.poll(async () => decodePng(await canvasBytes(preview(popup)))).toBe(qrText);
+  const safeQrPng = await canvasBytes(preview(popup));
+
+  await content(popup).fill('javascript:alert(1)');
+  await expect.poll(async () => decodePng(await canvasBytes(preview(popup)))).toBe('javascript:alert(1)');
+  const unsafeQrPng = await canvasBytes(preview(popup));
+
+  await popup.getByRole('button', { name: 'Decode', exact: true }).click();
+  const fileInput = popup.getByLabel('Choose image', { exact: true });
+
+  // Safe https:// QR shows Open link and can switch back to Generate.
+  await fileInput.setInputFiles({ name: 'safe.png', mimeType: 'image/png', buffer: safeQrPng });
+  const decodedOutput = popup.getByRole('textbox', { name: 'Decoded content', exact: true });
+  await expect(decodedOutput).toHaveValue(qrText);
+  const openLink = popup.getByRole('link', { name: 'Open link', exact: true });
+  await expect(openLink).toHaveAttribute('href', qrText);
+  await expect(openLink).toHaveAttribute('rel', /\bnoopener\b/);
+
+  // Unsafe javascript: QR decodes as text but never renders an Open link anchor.
+  await fileInput.setInputFiles({ name: 'unsafe.png', mimeType: 'image/png', buffer: unsafeQrPng });
+  await expect(decodedOutput).toHaveValue('javascript:alert(1)');
+  await expect(popup.getByRole('link', { name: 'Open link', exact: true })).toHaveCount(0);
+
+  // Non-QR image shows clear not-found error.
+  const blank = new PNG({ width: 64, height: 64 });
+  blank.data.fill(Buffer.from([255, 255, 255, 255]));
+  await fileInput.setInputFiles({ name: 'blank.png', mimeType: 'image/png', buffer: PNG.sync.write(blank) });
+  await expect(popup.getByRole('alert')).toHaveText('No QR code found in this image.');
+
+  // Decode safe again and hand back to Generate mode.
+  await fileInput.setInputFiles({ name: 'safe.png', mimeType: 'image/png', buffer: safeQrPng });
+  await expect(decodedOutput).toHaveValue(qrText);
+  await popup.getByRole('button', { name: 'Generate QR', exact: true }).click();
+  await expect(content(popup)).toHaveValue(qrText);
+});
+
+test('cleans tracking parameters, supports restoring a parameter, and hands off to QR generator', async ({ extension }) => {
+  const popup = await openPopup(extension);
+  await popup.setViewportSize({ width: 400, height: 600 });
+
+  await popup.getByRole('button', { name: 'Tools', exact: true }).click();
+  await popup.getByRole('button', { name: /Link cleaner/ }).click();
+  await expect(popup.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
+
+  const linkField = popup.getByRole('textbox', { name: 'Link', exact: true });
+  await linkField.fill('https://example.com/post?id=42&utm_source=newsletter&fbclid=abc');
+
+  const cleanedOutput = popup.getByRole('textbox', { name: 'Cleaned link', exact: true });
+  await expect(cleanedOutput).toHaveValue('https://example.com/post?id=42');
+
+  // Restore utm_source by clicking its chip, then toggle it back off.
+  await popup.getByRole('button', { name: 'utm_source', exact: true }).click();
+  await expect(cleanedOutput).toHaveValue('https://example.com/post?id=42&utm_source=newsletter');
+  await popup.getByRole('button', { name: 'utm_source', exact: true }).click();
+  await expect(cleanedOutput).toHaveValue('https://example.com/post?id=42');
+
+  // Hand off cleaned URL to QR generator.
+  await popup.getByRole('button', { name: 'Make QR', exact: true }).click();
+  await expect(popup.getByRole('heading', { name: 'QR code generator', exact: true })).toBeVisible();
+  await expect(content(popup)).toHaveValue('https://example.com/post?id=42');
+});
+
+test('routes queued text-cleaner launches directly and avoids prefilling active tab URL on manual switch', async ({ extension }) => {
+  const tab = await extension.context.newPage();
+  await tab.goto(fixtureUrl);
+
+  // Manual switch to Text cleaner must NOT inject the active tab URL.
+  await extension.worker.evaluate(async () => {
+    await chrome.storage.local.set({ lastToolId: 'text-cleaner' });
+  });
+  await withBrowserAction(extension, tab, async (evaluate) => {
+    await expect.poll(() => evaluate(() => ({
+      heading: document.querySelector('h1')?.textContent,
+      text: document.querySelector('textarea')?.value,
+    }))).toEqual({ heading: 'Text cleaner', text: '' });
+  });
+
+  // Queued context-menu launch routes directly to Text cleaner with selected text.
+  const messy = '  Hello   world  \n\n\nSecond   line  ';
+  await extension.worker.evaluate(async (text) => {
+    await chrome.storage.session.set({ pendingToolLaunch: { toolId: 'text-cleaner', text } });
+  }, messy);
+
+  const popup = await openPopup(extension);
+  await popup.setViewportSize({ width: 400, height: 600 });
+  await expect(popup.getByRole('heading', { name: 'Text cleaner', exact: true })).toBeVisible();
+  const textArea = popup.getByRole('textbox', { name: 'Text', exact: true });
+  await expect(textArea).toHaveValue(messy);
+
+  await popup.getByRole('button', { name: 'Remove blank lines', exact: true }).click();
+  await expect(textArea).toHaveValue('  Hello   world  \nSecond   line  ');
+  await popup.getByRole('button', { name: 'Clean spaces', exact: true }).click();
+  await expect(textArea).toHaveValue('Hello world\nSecond line');
+
+  await popup.getByRole('button', { name: 'Undo', exact: true }).click();
+  await expect(textArea).toHaveValue('  Hello   world  \nSecond   line  ');
 });

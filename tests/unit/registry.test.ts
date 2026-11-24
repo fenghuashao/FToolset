@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import en from '../../public/_locales/en/messages.json';
 import zh from '../../public/_locales/zh_CN/messages.json';
-import { getShareablePageUrl } from '../../src/shared/launch';
+import { getShareablePageUrl, isSafeHttpUrl, parsePendingLaunch } from '../../src/shared/launch';
+import { TOOL_IDS } from '../../src/shared/tool-ids';
 import { defaultToolId, getTool, searchTools, toolRegistry } from '../../src/tools/registry';
 
 describe('tool registry', () => {
   it('registers unique tool IDs and names the default tool', () => {
     expect(new Set(toolRegistry.map((tool) => tool.id)).size).toBe(toolRegistry.length);
+    expect(toolRegistry.map((tool) => tool.id)).toEqual([
+      TOOL_IDS.qrCode,
+      TOOL_IDS.linkCleaner,
+      TOOL_IDS.textCleaner,
+    ]);
     expect(getTool(defaultToolId).id).toBe('qr-code');
   });
 
@@ -15,16 +21,21 @@ describe('tool registry', () => {
   });
 
   it('matches localized names, descriptions, keywords and multiple terms', () => {
-    expect(searchTools(' QR  link ', (key) => en[key].message)).toEqual(toolRegistry);
-    expect(searchTools('转换', (key) => zh[key].message)).toEqual(toolRegistry);
-    expect(searchTools('二维码', (key) => zh[key].message)).toEqual(toolRegistry);
-    expect(searchTools('barcode', (key) => en[key].message)).toEqual(toolRegistry);
-    expect(searchTools('  ', (key) => en[key].message)).toEqual(toolRegistry);
-    expect(searchTools('timestamp', (key) => en[key].message)).toEqual([]);
+    const ids = (query: string, catalog: typeof en) =>
+      searchTools(query, (key) => catalog[key].message).map((tool) => tool.id);
+
+    expect(ids(' QR  link ', en)).toEqual([TOOL_IDS.qrCode]);
+    expect(ids('二维码', zh)).toEqual([TOOL_IDS.qrCode]);
+    expect(ids('utm', en)).toEqual([TOOL_IDS.linkCleaner]);
+    expect(ids('追踪 参数', zh)).toEqual([TOOL_IDS.linkCleaner]);
+    expect(ids('word count', en)).toEqual([TOOL_IDS.textCleaner]);
+    expect(ids('字数 断行', zh)).toEqual([TOOL_IDS.textCleaner]);
+    expect(ids('  ', en)).toEqual(toolRegistry.map((tool) => tool.id));
+    expect(ids('timestamp', en)).toEqual([]);
   });
 });
 
-describe('current page URL', () => {
+describe('URL and launch helpers', () => {
   it.each(['https://example.com/a#heading', 'http://localhost:4000/?a=b', 'file:///tmp/example.txt'])(
     'preserves a shareable URL (%s)',
     (url) => expect(getShareablePageUrl(url)).toBe(url),
@@ -34,4 +45,23 @@ describe('current page URL', () => {
     'falls back to empty content (%s)',
     (url) => expect(getShareablePageUrl(url)).toBe(''),
   );
+
+  it('allows only http and https URLs in isSafeHttpUrl', () => {
+    expect(isSafeHttpUrl('https://example.com/path?a=1')).toBe(true);
+    expect(isSafeHttpUrl('http://localhost:3000')).toBe(true);
+    expect(isSafeHttpUrl('javascript:alert(1)')).toBe(false);
+    expect(isSafeHttpUrl('data:text/html,<script>alert(1)</script>')).toBe(false);
+    expect(isSafeHttpUrl('file:///etc/passwd')).toBe(false);
+    expect(isSafeHttpUrl('not a url')).toBe(false);
+  });
+
+  it('validates structured pending launch payloads', () => {
+    expect(parsePendingLaunch({ toolId: TOOL_IDS.textCleaner, text: 'hello' })).toEqual({
+      toolId: TOOL_IDS.textCleaner,
+      text: 'hello',
+    });
+    expect(parsePendingLaunch({ toolId: 'unknown', text: 'hello' })).toBeNull();
+    expect(parsePendingLaunch({ toolId: TOOL_IDS.qrCode, text: '' })).toBeNull();
+    expect(parsePendingLaunch('legacy-string')).toBeNull();
+  });
 });

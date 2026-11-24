@@ -1,7 +1,7 @@
 import type { QrLogo } from './config';
 
-const MAX_FILE_BYTES = 4 * 1024 * 1024;
-const MAX_IMAGE_DIMENSION = 4096;
+export const MAX_FILE_BYTES = 4 * 1024 * 1024;
+export const MAX_IMAGE_DIMENSION = 4096;
 const MAX_LOGO_DIMENSION = 256;
 
 type LogoErrorReason = 'type' | 'size';
@@ -23,7 +23,19 @@ function logoMimeType(file: File): string {
   throw new QrLogoError('type');
 }
 
-function readDataUrl(blob: Blob): Promise<string> {
+export function decodeMimeType(file: Blob): string | null {
+  const type = file.type.toLowerCase();
+  if (['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(type)) return type;
+  if ((!type || type === 'application/octet-stream') && 'name' in file && typeof file.name === 'string') {
+    if (/\.png$/i.test(file.name)) return 'image/png';
+    if (/\.jpe?g$/i.test(file.name)) return 'image/jpeg';
+    if (/\.webp$/i.test(file.name)) return 'image/webp';
+    if (/\.gif$/i.test(file.name)) return 'image/gif';
+  }
+  return null;
+}
+
+export function readDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.addEventListener('load', () => {
@@ -49,11 +61,12 @@ export function drawImage(
   image: CanvasImageSource,
   width: number,
   height: number,
+  options?: CanvasRenderingContext2DSettings,
 ): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', options);
   if (!context) throw new Error('Could not open a canvas context.');
   context.drawImage(image, 0, 0, width, height);
   return canvas;

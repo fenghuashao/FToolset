@@ -18,6 +18,7 @@
     "zip": "wxt zip -b chrome --mv3"
   },
   "dependencies": {
+    "jsqr": "1.4.0",
     "qr-code-styling": "1.9.2",
     "react": "19.3.1",
     "react-dom": "19.3.1"
@@ -31,7 +32,6 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@wxt-dev/module-react": "1.2.2",
-    "jsqr": "1.4.0",
     "pngjs": "7.0.0",
     "sharp": "0.35.5",
     "tailwindcss": "4.3.5",

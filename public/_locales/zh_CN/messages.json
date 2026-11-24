@@ -6,7 +6,7 @@
     "message": "FToolset"
   },
   "extensionDescription": {
-    "message": "离线将当前网页、链接或文本生成二维码。支持自定义样式与中心图标，复制 PNG 或下载 PNG、SVG。"
+    "message": "离线二维码生成与识别、链接追踪参数清理与文字整理字数统计。本机运行、无需账号、零上传。"
   },
   "rateExtension": {
     "message": "去商店评分"
@@ -32,8 +32,29 @@
   "toolQrName": {
     "message": "二维码生成器"
   },
+  "toolQrShortName": {
+    "message": "二维码"
+  },
   "toolQrDescription": {
-    "message": "把链接或文本转换为二维码。"
+    "message": "生成或识别链接、文字与图片中的二维码。"
+  },
+  "toolLinkName": {
+    "message": "链接净化"
+  },
+  "toolLinkShortName": {
+    "message": "链接净化"
+  },
+  "toolLinkDescription": {
+    "message": "去除链接中的追踪参数，分享更清爽。"
+  },
+  "toolTextName": {
+    "message": "文字整理"
+  },
+  "toolTextShortName": {
+    "message": "文字整理"
+  },
+  "toolTextDescription": {
+    "message": "统计字数并清理空格、空行、PDF 断行与大小写。"
   },
   "tools": {
     "message": "工具"
@@ -43,6 +64,12 @@
   },
   "noTools": {
     "message": "没有找到匹配的工具。"
+  },
+  "showQuickSwitcher": {
+    "message": "显示快捷切换栏"
+  },
+  "quickSwitcherLabel": {
+    "message": "快捷切换工具"
   },
   "loadingTool": {
     "message": "正在加载工具…"
@@ -58,6 +85,21 @@
   },
   "menuLink": {
     "message": "将此链接生成二维码"
+  },
+  "menuCleanLink": {
+    "message": "净化此链接"
+  },
+  "menuCleanText": {
+    "message": "整理所选文本 / 统计字数"
+  },
+  "qrModeLabel": {
+    "message": "二维码模式"
+  },
+  "qrModeGenerate": {
+    "message": "生成"
+  },
+  "qrModeDecode": {
+    "message": "识别"
   },
   "qrContent": {
     "message": "内容"
@@ -160,5 +202,199 @@
   },
   "qrDownloadError": {
     "message": "无法下载二维码，请重试。"
+  },
+  "qrDecodeDropTitle": {
+    "message": "粘贴截图（Ctrl+V）、拖入或选择图片"
+  },
+  "qrDecodeDropHint": {
+    "message": "PNG、JPG、WebP 或 GIF，最大 4 MB"
+  },
+  "qrDecodeChooseFile": {
+    "message": "选择图片"
+  },
+  "qrDecodeScanning": {
+    "message": "正在识别二维码…"
+  },
+  "qrDecodeResult": {
+    "message": "识别结果"
+  },
+  "qrDecodeCopy": {
+    "message": "复制结果"
+  },
+  "qrDecodeCopied": {
+    "message": "已复制识别结果。"
+  },
+  "qrDecodeCopyError": {
+    "message": "无法自动复制，请手动选中复制。"
+  },
+  "qrDecodeOpenLink": {
+    "message": "打开链接"
+  },
+  "qrDecodeEditAsQr": {
+    "message": "转为生成"
+  },
+  "qrDecodeClear": {
+    "message": "清除"
+  },
+  "qrDecodeNotFound": {
+    "message": "未在图片中识别到二维码。"
+  },
+  "qrDecodeTypeError": {
+    "message": "请选择 PNG、JPG、WebP 或 GIF 图片。"
+  },
+  "qrDecodeSizeError": {
+    "message": "请选择不超过 4 MB、宽高各不超过 4096 像素的图片。"
+  },
+  "qrDecodeReadError": {
+    "message": "无法读取此图片，请换一张重试。"
+  },
+  "qrDecodePreview": {
+    "message": "待识别图片预览"
+  },
+  "linkInputLabel": {
+    "message": "链接"
+  },
+  "linkInputPlaceholder": {
+    "message": "输入或粘贴 http:// 或 https:// 链接"
+  },
+  "linkClear": {
+    "message": "清空"
+  },
+  "linkRestore": {
+    "message": "恢复当前网页链接"
+  },
+  "linkResultLabel": {
+    "message": "净化结果"
+  },
+  "linkEmpty": {
+    "message": "输入链接以清理常见追踪参数。"
+  },
+  "linkInvalid": {
+    "message": "请输入有效的 http:// 或 https:// 链接。"
+  },
+  "linkAlreadyClean": {
+    "message": "未发现常见追踪参数，链接已很清爽。"
+  },
+  "linkRemovedCount": {
+    "message": "已移除 $COUNT$ 个追踪参数（点击可还原）：",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "linkRemovedOne": {
+    "message": "已移除 1 个追踪参数（点击可还原）："
+  },
+  "linkRestoreAll": {
+    "message": "全部还原"
+  },
+  "linkCopy": {
+    "message": "复制干净链接"
+  },
+  "linkCopySuccess": {
+    "message": "已复制干净链接。"
+  },
+  "linkCopyError": {
+    "message": "无法自动复制，请手动选中复制。"
+  },
+  "linkMakeQr": {
+    "message": "生成二维码"
+  },
+  "textInputLabel": {
+    "message": "文本"
+  },
+  "textInputPlaceholder": {
+    "message": "输入或粘贴需要统计或整理的文本"
+  },
+  "textStatChars": {
+    "message": "字符数"
+  },
+  "textStatNoSpaces": {
+    "message": "不含空格 $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "textStatWords": {
+    "message": "词数"
+  },
+  "textStatCjk": {
+    "message": "汉字 $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "textStatParagraphs": {
+    "message": "段落"
+  },
+  "textStatReadTime": {
+    "message": "预计阅读"
+  },
+  "textReadLessThanMin": {
+    "message": "< 1 分钟"
+  },
+  "textReadMinutes": {
+    "message": "$COUNT$ 分钟",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "textReadZero": {
+    "message": "0 分钟"
+  },
+  "textActionCleanSpaces": {
+    "message": "清理空格"
+  },
+  "textActionRemoveBlankLines": {
+    "message": "去空行"
+  },
+  "textActionFixPdf": {
+    "message": "修 PDF 断行"
+  },
+  "textActionDedupeLines": {
+    "message": "行去重"
+  },
+  "textCaseToggle": {
+    "message": "英文大小写转换"
+  },
+  "textCaseUpper": {
+    "message": "全部大写"
+  },
+  "textCaseLower": {
+    "message": "全部小写"
+  },
+  "textCaseSentence": {
+    "message": "句首大写"
+  },
+  "textCaseTitle": {
+    "message": "标题大写"
+  },
+  "textCopy": {
+    "message": "复制结果"
+  },
+  "textCopySuccess": {
+    "message": "已复制整理后的文本。"
+  },
+  "textCopyError": {
+    "message": "无法自动复制，请手动选中复制。"
+  },
+  "textUndo": {
+    "message": "撤销"
+  },
+  "textReset": {
+    "message": "还原原文"
+  },
+  "textClear": {
+    "message": "清空"
+  },
+  "textNoChange": {
+    "message": "内容无需调整。"
   }
 }

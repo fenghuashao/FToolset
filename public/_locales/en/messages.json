@@ -6,7 +6,7 @@
     "message": "FToolset"
   },
   "extensionDescription": {
-    "message": "Generate QR codes from the current tab, a link, or text. Customize, copy, and export PNG or SVG entirely offline."
+    "message": "Offline QR code generator & decoder, link tracker cleaner, and text cleaner with word counter in your Chrome toolbar."
   },
   "rateExtension": {
     "message": "Rate on Chrome Web Store"
@@ -32,8 +32,29 @@
   "toolQrName": {
     "message": "QR code generator"
   },
+  "toolQrShortName": {
+    "message": "QR Code"
+  },
   "toolQrDescription": {
-    "message": "Turn a link or text into a QR code."
+    "message": "Generate or decode QR codes from links, text, or images."
+  },
+  "toolLinkName": {
+    "message": "Link cleaner"
+  },
+  "toolLinkShortName": {
+    "message": "Link"
+  },
+  "toolLinkDescription": {
+    "message": "Remove tracking parameters from links before sharing."
+  },
+  "toolTextName": {
+    "message": "Text cleaner"
+  },
+  "toolTextShortName": {
+    "message": "Text"
+  },
+  "toolTextDescription": {
+    "message": "Count words and clean spaces, blank lines, or PDF line breaks."
   },
   "tools": {
     "message": "Tools"
@@ -43,6 +64,12 @@
   },
   "noTools": {
     "message": "No matching tools."
+  },
+  "showQuickSwitcher": {
+    "message": "Show quick tool bar"
+  },
+  "quickSwitcherLabel": {
+    "message": "Quick tool switcher"
   },
   "loadingTool": {
     "message": "Loading tool…"
@@ -58,6 +85,21 @@
   },
   "menuLink": {
     "message": "Make a QR code from this link"
+  },
+  "menuCleanLink": {
+    "message": "Clean tracking parameters from link"
+  },
+  "menuCleanText": {
+    "message": "Clean & count selected text"
+  },
+  "qrModeLabel": {
+    "message": "QR code mode"
+  },
+  "qrModeGenerate": {
+    "message": "Generate"
+  },
+  "qrModeDecode": {
+    "message": "Decode"
   },
   "qrContent": {
     "message": "Content"
@@ -160,5 +202,199 @@
   },
   "qrDownloadError": {
     "message": "Could not download the QR code. Please try again."
+  },
+  "qrDecodeDropTitle": {
+    "message": "Paste screenshot (Ctrl+V), drop, or choose an image"
+  },
+  "qrDecodeDropHint": {
+    "message": "PNG, JPG, WebP, or GIF · up to 4 MB"
+  },
+  "qrDecodeChooseFile": {
+    "message": "Choose image"
+  },
+  "qrDecodeScanning": {
+    "message": "Reading QR code…"
+  },
+  "qrDecodeResult": {
+    "message": "Decoded content"
+  },
+  "qrDecodeCopy": {
+    "message": "Copy text"
+  },
+  "qrDecodeCopied": {
+    "message": "Decoded text copied."
+  },
+  "qrDecodeCopyError": {
+    "message": "Could not copy text. Select and copy it manually."
+  },
+  "qrDecodeOpenLink": {
+    "message": "Open link"
+  },
+  "qrDecodeEditAsQr": {
+    "message": "Generate QR"
+  },
+  "qrDecodeClear": {
+    "message": "Clear"
+  },
+  "qrDecodeNotFound": {
+    "message": "No QR code found in this image."
+  },
+  "qrDecodeTypeError": {
+    "message": "Choose a PNG, JPG, WebP, or GIF image."
+  },
+  "qrDecodeSizeError": {
+    "message": "Choose an image smaller than 4 MB and up to 4096 × 4096 pixels."
+  },
+  "qrDecodeReadError": {
+    "message": "Could not open this image. Try a different file."
+  },
+  "qrDecodePreview": {
+    "message": "Uploaded image preview"
+  },
+  "linkInputLabel": {
+    "message": "Link"
+  },
+  "linkInputPlaceholder": {
+    "message": "Paste an http:// or https:// link"
+  },
+  "linkClear": {
+    "message": "Clear"
+  },
+  "linkRestore": {
+    "message": "Restore current URL"
+  },
+  "linkResultLabel": {
+    "message": "Cleaned link"
+  },
+  "linkEmpty": {
+    "message": "Enter a link to check for tracking parameters."
+  },
+  "linkInvalid": {
+    "message": "Enter a valid http:// or https:// link."
+  },
+  "linkAlreadyClean": {
+    "message": "No common tracking parameters found."
+  },
+  "linkRemovedCount": {
+    "message": "Removed $COUNT$ tracking parameters (click any to restore):",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "linkRemovedOne": {
+    "message": "Removed 1 tracking parameter (click to restore):"
+  },
+  "linkRestoreAll": {
+    "message": "Restore all"
+  },
+  "linkCopy": {
+    "message": "Copy clean link"
+  },
+  "linkCopySuccess": {
+    "message": "Clean link copied."
+  },
+  "linkCopyError": {
+    "message": "Could not copy link. Select and copy it manually."
+  },
+  "linkMakeQr": {
+    "message": "Make QR"
+  },
+  "textInputLabel": {
+    "message": "Text"
+  },
+  "textInputPlaceholder": {
+    "message": "Paste or type text to count and clean"
+  },
+  "textStatChars": {
+    "message": "Characters"
+  },
+  "textStatNoSpaces": {
+    "message": "No spaces: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "textStatWords": {
+    "message": "Words"
+  },
+  "textStatCjk": {
+    "message": "CJK: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "textStatParagraphs": {
+    "message": "Paragraphs"
+  },
+  "textStatReadTime": {
+    "message": "Read time"
+  },
+  "textReadLessThanMin": {
+    "message": "< 1 min"
+  },
+  "textReadMinutes": {
+    "message": "$COUNT$ min",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "textReadZero": {
+    "message": "0 min"
+  },
+  "textActionCleanSpaces": {
+    "message": "Clean spaces"
+  },
+  "textActionRemoveBlankLines": {
+    "message": "Remove blank lines"
+  },
+  "textActionFixPdf": {
+    "message": "Fix PDF breaks"
+  },
+  "textActionDedupeLines": {
+    "message": "Dedupe lines"
+  },
+  "textCaseToggle": {
+    "message": "English letter case"
+  },
+  "textCaseUpper": {
+    "message": "UPPERCASE"
+  },
+  "textCaseLower": {
+    "message": "lowercase"
+  },
+  "textCaseSentence": {
+    "message": "Sentence case"
+  },
+  "textCaseTitle": {
+    "message": "Title Case"
+  },
+  "textCopy": {
+    "message": "Copy text"
+  },
+  "textCopySuccess": {
+    "message": "Text copied to clipboard."
+  },
+  "textCopyError": {
+    "message": "Could not copy text. Select and copy it manually."
+  },
+  "textUndo": {
+    "message": "Undo"
+  },
+  "textReset": {
+    "message": "Reset"
+  },
+  "textClear": {
+    "message": "Clear"
+  },
+  "textNoChange": {
+    "message": "Text is already clean."
   }
 }
