@@ -589,3 +589,30 @@ test('routes queued text-cleaner launches directly and avoids prefilling active 
   await resetBtn.click();
   await expect(manualArea).toHaveValue('foo   bar');
 });
+
+test('expands into a full tab with draft handoff, clean wide layout, and session cleanup', async ({ extension }) => {
+  const popup = await openPopup(extension);
+  await popup.setViewportSize({ width: 400, height: 600 });
+
+  await popup.getByRole('button', { name: 'Tools', exact: true }).click();
+  await popup.getByRole('button', { name: /Text cleaner/ }).click();
+  await expect(popup.getByRole('heading', { name: 'Text cleaner', exact: true })).toBeVisible();
+
+  const draft = 'Line one   with spaces\n\nLine two';
+  await popup.getByRole('textbox', { name: 'Text', exact: true }).fill(draft);
+
+  const [fullTab] = await Promise.all([
+    extension.context.waitForEvent('page'),
+    popup.getByRole('button', { name: 'Open in full tab', exact: true }).click(),
+  ]);
+  await fullTab.setViewportSize({ width: 1024, height: 720 });
+  await fullTab.waitForLoadState('domcontentloaded');
+
+  expect(fullTab.url()).toBe(`${extension.popupUrl}?view=tab`);
+  await expect(fullTab.locator('html')).toHaveAttribute('data-view', 'tab');
+  await expect(fullTab.getByRole('heading', { name: 'Text cleaner', exact: true })).toBeVisible();
+  await expect(fullTab.getByRole('textbox', { name: 'Text', exact: true })).toHaveValue(draft);
+  await expect(fullTab.getByRole('button', { name: 'Open in full tab', exact: true })).toHaveCount(0);
+  await expect.poll(() => fullTab.evaluate(() => document.body.clientWidth)).toBeGreaterThan(600);
+  expect(await extension.worker.evaluate(() => chrome.storage.session.get('pendingTabHandoff'))).toEqual({});
+});

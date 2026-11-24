@@ -71,6 +71,12 @@
   "quickSwitcherLabel": {
     "message": "Quick tool switcher"
   },
+  "openInNewTab": {
+    "message": "Open in full tab"
+  },
+  "openInNewTabShort": {
+    "message": "Expand"
+  },
   "loadingTool": {
     "message": "Loading tool…"
   },

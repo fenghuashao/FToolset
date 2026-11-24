@@ -5,12 +5,16 @@ import { TOOL_IDS } from '../../shared/tool-ids';
 import type { ToolProps } from '../registry';
 import { cleanUrl } from './clean';
 
-export default function LinkCleaner({ launchText, currentPageUrl, openTool }: ToolProps) {
+export default function LinkCleaner({ launchText, currentPageUrl, openTool, reportDraft }: ToolProps) {
   const [input, setInput] = useState(launchText ?? currentPageUrl);
   const [restoredIds, setRestoredIds] = useState<ReadonlySet<string>>(() => new Set());
   const [toast, setToast] = useState<{ key: MessageKey; error: boolean }>();
 
   const result = useMemo(() => cleanUrl(input, restoredIds), [input, restoredIds]);
+
+  useEffect(() => {
+    reportDraft?.(input);
+  }, [input, reportDraft]);
 
   useEffect(() => {
     if (!toast) return;

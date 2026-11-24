@@ -54,6 +54,11 @@
     line-height: 1.5;
   }
 
+  :root[data-view='tab'] body {
+    width: 100%;
+    min-height: 100vh;
+  }
+
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;

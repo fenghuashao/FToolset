@@ -59,7 +59,7 @@ function PreviewCanvas({ image }: { readonly image: HTMLCanvasElement }) {
   );
 }
 
-export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
+export default function QrCode({ launchText, currentPageUrl, reportDraft }: ToolProps) {
   const [mode, setMode] = useState<QrMode>('generate');
   const [text, setText] = useState(launchText ?? currentPageUrl);
   const [config, setConfig] = useState(DEFAULT_QR_CONFIG);
@@ -83,6 +83,10 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
   const [decodeError, setDecodeError] = useState<MessageKey>();
   const decodeInput = useRef<HTMLInputElement>(null);
   const decodeRevision = useRef(0);
+
+  useEffect(() => {
+    reportDraft?.(text);
+  }, [text, reportDraft]);
 
   useEffect(() => {
     if (mode !== 'generate' || request.text === '') return;
@@ -269,7 +273,7 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
     <div className="grid gap-3.5">
       <div
         aria-label={t('qrModeLabel')}
-        className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-surface p-1"
+        className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-surface p-1 sm:max-w-xs"
         role="group"
       >
         <button
@@ -293,13 +297,13 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
       </div>
 
       {mode === 'generate' ? (
-        <>
-          <div className="grid gap-1.5">
+        <div className="grid gap-3.5 sm:grid-cols-[minmax(0,1fr)_240px] sm:items-start">
+          <div className="grid gap-1.5 sm:col-start-1">
             <label className="text-sm font-semibold text-ink" htmlFor="qr-content">
               {t('qrContent')}
             </label>
             <textarea
-              className="field min-h-18 resize-y break-words"
+              className="field min-h-18 resize-y break-words sm:min-h-28"
               id="qr-content"
               onChange={(event) => setText(event.currentTarget.value)}
               placeholder={t('qrContentPlaceholder')}
@@ -329,7 +333,7 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
           </div>
 
           <section
-            className="grid min-h-52 place-items-center rounded-xl border border-line bg-tint px-3 py-4"
+            className="grid min-h-52 place-items-center rounded-xl border border-line bg-tint px-3 py-4 sm:col-start-2 sm:row-start-1 sm:row-span-3 sm:min-h-60"
             style={{
               backgroundImage: 'radial-gradient(var(--preview-grid) 1px, transparent 1px)',
               backgroundSize: '14px 14px',
@@ -348,7 +352,7 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
             )}
           </section>
 
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 sm:col-start-1">
             <button
               className="button button-primary"
               disabled={!ready?.image}
@@ -380,7 +384,7 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
             </div>
           </div>
 
-          <details className="group rounded-lg border border-line bg-surface">
+          <details className="group rounded-lg border border-line bg-surface sm:col-start-1">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-3 text-sm font-semibold text-ink">
               <span className="inline-flex items-center gap-2">
                 <Icon name="sliders" size={16} />
@@ -497,7 +501,7 @@ export default function QrCode({ launchText, currentPageUrl }: ToolProps) {
               </div>
             </div>
           </details>
-        </>
+        </div>
       ) : (
         <div className="grid gap-3">
           <div

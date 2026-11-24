@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import en from '../../public/_locales/en/messages.json';
 import zh from '../../public/_locales/zh_CN/messages.json';
-import { getShareablePageUrl, isSafeHttpUrl, parsePendingLaunch } from '../../src/shared/launch';
+import {
+  getShareablePageUrl,
+  isSafeHttpUrl,
+  parsePendingLaunch,
+  parseTabHandoff,
+} from '../../src/shared/launch';
 import { TOOL_IDS } from '../../src/shared/tool-ids';
 import { defaultToolId, getTool, searchTools, toolRegistry } from '../../src/tools/registry';
 
@@ -63,5 +68,27 @@ describe('URL and launch helpers', () => {
     expect(parsePendingLaunch({ toolId: 'unknown', text: 'hello' })).toBeNull();
     expect(parsePendingLaunch({ toolId: TOOL_IDS.qrCode, text: '' })).toBeNull();
     expect(parsePendingLaunch('legacy-string')).toBeNull();
+  });
+
+  it('validates tab handoff payloads and filters non-shareable source URLs', () => {
+    expect(parseTabHandoff({
+      toolId: TOOL_IDS.linkCleaner,
+      text: 'https://example.com/?utm_source=a',
+      sourceUrl: 'https://example.com/',
+    })).toEqual({
+      toolId: TOOL_IDS.linkCleaner,
+      text: 'https://example.com/?utm_source=a',
+      sourceUrl: 'https://example.com/',
+    });
+    expect(parseTabHandoff({
+      toolId: TOOL_IDS.textCleaner,
+      text: '',
+      sourceUrl: 'chrome://extensions',
+    })).toEqual({
+      toolId: TOOL_IDS.textCleaner,
+      text: '',
+      sourceUrl: undefined,
+    });
+    expect(parseTabHandoff({ toolId: 'invalid' })).toBeNull();
   });
 });

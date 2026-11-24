@@ -34,13 +34,17 @@ function formatReadingTime(readingTime: ReadingTime): string {
   }
 }
 
-export default function TextCleaner({ launchText }: ToolProps) {
+export default function TextCleaner({ launchText, reportDraft }: ToolProps) {
   const initial = launchText ?? '';
   const [text, setText] = useState(initial);
   const [originalText, setOriginalText] = useState(initial);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [stats, setStats] = useState<TextStats>(() => analyzeText(initial));
   const [toast, setToast] = useState<{ key: MessageKey; error: boolean }>();
+
+  useEffect(() => {
+    reportDraft?.(text);
+  }, [text, reportDraft]);
 
   useEffect(() => {
     if (text.length <= LARGE_TEXT_THRESHOLD) {
@@ -110,7 +114,7 @@ export default function TextCleaner({ launchText }: ToolProps) {
 
   return (
     <div className="grid gap-3">
-      <section className="grid grid-cols-2 gap-2">
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="rounded-lg border border-line bg-surface px-3 py-2">
           <p className="text-xs text-muted">{t('textStatChars')}</p>
           <p className="text-base font-bold text-ink">{stats.characters}</p>
@@ -136,7 +140,7 @@ export default function TextCleaner({ launchText }: ToolProps) {
           {t('textInputLabel')}
         </label>
         <textarea
-          className="field min-h-28 resize-y break-words"
+          className="field min-h-28 resize-y break-words sm:min-h-56"
           id="text-cleaner-input"
           onChange={(event) => handleInputChange(event.currentTarget.value)}
           placeholder={t('textInputPlaceholder')}
@@ -145,7 +149,7 @@ export default function TextCleaner({ launchText }: ToolProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
         <button
           className="button"
           disabled={!text}
@@ -187,7 +191,7 @@ export default function TextCleaner({ launchText }: ToolProps) {
             <Icon name="chevronDown" size={15} />
           </span>
         </summary>
-        <div className="grid grid-cols-2 gap-1.5 border-t border-line p-2.5">
+        <div className="grid grid-cols-2 gap-1.5 border-t border-line p-2.5 sm:grid-cols-4">
           {CASE_ACTIONS.map(([mode, key]) => (
             <button
               key={mode}

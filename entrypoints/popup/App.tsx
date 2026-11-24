@@ -3,9 +3,11 @@ import { Icon } from '../../src/shared/Icon';
 import { t } from '../../src/shared/i18n';
 import {
   consumePendingLaunch,
+  consumeTabHandoff,
   getShareablePageUrl,
   lastToolIdKey,
   quickSwitcherKey,
+  writeTabHandoff,
 } from '../../src/shared/launch';
 import type { ToolId } from '../../src/shared/tool-ids';
 import { getTool, searchTools, toolRegistry } from '../../src/tools/registry';
@@ -20,44 +22,56 @@ interface PopupState {
   showQuickSwitcher: boolean;
 }
 
-async function loadPopup(): Promise<PopupState> {
-  const [tabs, stored, launch] = await Promise.all([
-    chrome.tabs.query({ active: true, currentWindow: true }).catch(() => []),
+async function loadPopup(isTabView: boolean): Promise<PopupState> {
+  const [tabs, stored, launch, handoff] = await Promise.all([
+    isTabView
+      ? Promise.resolve([])
+      : chrome.tabs.query({ active: true, currentWindow: true }).catch(() => []),
     chrome.storage.local.get([lastToolIdKey, quickSwitcherKey]).catch(() => ({} as Record<string, unknown>)),
     consumePendingLaunch(),
+    isTabView ? consumeTabHandoff() : Promise.resolve(null),
   ]);
-  const currentPageUrl = getShareablePageUrl(tabs[0]?.url);
-  const toolId = getTool(launch?.toolId ?? stored[lastToolIdKey]).id;
+  const currentPageUrl = isTabView
+    ? (handoff?.sourceUrl ?? '')
+    : getShareablePageUrl(tabs[0]?.url);
+  const toolId = getTool(launch?.toolId ?? handoff?.toolId ?? stored[lastToolIdKey]).id;
   void chrome.storage.local.set({ [lastToolIdKey]: toolId }).catch(() => undefined);
   return {
     toolId,
-    launchText: launch?.text,
+    launchText: launch?.text ?? handoff?.text,
     launchNonce: 0,
     currentPageUrl,
     showQuickSwitcher: stored[quickSwitcherKey] === true,
   };
 }
 
-export function App() {
+export function App({ isTabView = false }: { readonly isTabView?: boolean }) {
   const [state, setState] = useState<PopupState | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
   const pickerButton = useRef<HTMLButtonElement>(null);
   const searchField = useRef<HTMLInputElement>(null);
+  const draftRef = useRef<string | undefined>(undefined);
   const tool = state && getTool(state.toolId);
   const options = pickerOpen ? searchTools(query, t) : [];
 
   useEffect(() => {
     let mounted = true;
-    void loadPopup().then((loaded) => {
+    void loadPopup(isTabView).then((loaded) => {
       if (mounted) setState(loaded);
     });
     return () => { mounted = false; };
-  }, []);
+  }, [isTabView]);
 
   useEffect(() => {
     if (pickerOpen) searchField.current?.focus();
   }, [pickerOpen]);
+
+  useEffect(() => {
+    if (isTabView && tool) {
+      document.title = `${t(tool.nameKey)} · ${t('extensionName')}`;
+    }
+  }, [isTabView, tool]);
 
   function closePicker(restoreFocus = true) {
     setPickerOpen(false);
@@ -65,7 +79,12 @@ export function App() {
     if (restoreFocus) pickerButton.current?.focus();
   }
 
+  const reportDraft = useCallback((value: string) => {
+    draftRef.current = value;
+  }, []);
+
   const openTool = useCallback((id: ToolId, launchText?: string) => {
+    draftRef.current = launchText;
     setState((previous) => {
       if (!previous) return previous;
       if (previous.toolId === id && launchText === undefined) return previous;
@@ -89,103 +108,132 @@ export function App() {
     void chrome.storage.local.set({ [quickSwitcherKey]: enabled }).catch(() => undefined);
   }
 
+  async function expandToTab() {
+    if (!state) return;
+    await writeTabHandoff({
+      toolId: state.toolId,
+      text: draftRef.current,
+      sourceUrl: state.currentPageUrl || undefined,
+    });
+    await chrome.tabs.create({ url: chrome.runtime.getURL('popup.html?view=tab') });
+    window.close();
+  }
+
+  const shellContainer = isTabView ? 'mx-auto w-full max-w-3xl' : '';
+
   return (
     <>
       <header
         className="border-b border-line bg-surface"
         onKeyDown={(event) => { if (event.key === 'Escape' && pickerOpen) closePicker(); }}
       >
-        <PopupToolbar>
-          <button
-            className="button"
-            type="button"
-            ref={pickerButton}
-            disabled={!state}
-            aria-expanded={pickerOpen}
-            aria-controls="tool-picker"
-            onClick={() => { if (pickerOpen) closePicker(); else setPickerOpen(true); }}
-          >
-            <Icon name="search" size={15} />
-            {t('tools')}
-            <Icon name="chevrons" size={14} />
-          </button>
-        </PopupToolbar>
-        {state?.showQuickSwitcher && (
-          <nav
-            aria-label={t('quickSwitcherLabel')}
-            className="flex flex-wrap items-center gap-1.5 border-t border-line px-4 py-2"
-          >
-            {toolRegistry.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={item.id === tool?.id}
-                className="button min-h-8 flex-1 px-2 py-1 text-xs"
-                onClick={() => {
-                  openTool(item.id);
-                  if (pickerOpen) closePicker(false);
-                }}
-              >
-                <Icon name={item.icon} size={14} />
-                <span className="truncate">{t(item.shortNameKey)}</span>
-              </button>
-            ))}
-          </nav>
-        )}
-        <div id="tool-picker" hidden={!pickerOpen} className="border-t border-line px-4 py-3">
-          {pickerOpen && (
-            <>
-              <input
-                ref={searchField}
-                className="field"
-                type="search"
-                aria-label={t('searchTools')}
-                placeholder={t('searchTools')}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-              <ul className="mt-2 grid gap-1">
-                {options.map((option) => (
-                  <li key={option.id}>
-                    <button
-                      type="button"
-                      aria-pressed={option.id === tool?.id}
-                      className="button w-full justify-start py-2 text-left"
-                      onClick={() => selectToolFromPicker(option.id)}
-                    >
-                      <Icon name={option.icon} size={19} />
-                      <span className="flex-1">
-                        <span className="block">{t(option.nameKey)}</span>
-                        <span className="block font-normal text-muted">{t(option.descKey)}</span>
-                      </span>
-                      {option.id === tool?.id && <Icon name="check" size={15} />}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              {options.length === 0 && (
-                <p className="px-2 py-1 text-muted" role="status">{t('noTools')}</p>
-              )}
-              <div className="mt-2.5 border-t border-line pt-2.5">
-                <label className="flex cursor-pointer items-center gap-2 text-xs text-muted select-none">
-                  <input
-                    type="checkbox"
-                    className="size-3.5 accent-accent"
-                    checked={state?.showQuickSwitcher ?? false}
-                    onChange={(event) => toggleQuickSwitcher(event.currentTarget.checked)}
-                  />
-                  <span>{t('showQuickSwitcher')}</span>
-                </label>
-              </div>
-            </>
+        <div className={shellContainer}>
+          <PopupToolbar>
+            <button
+              className="button"
+              type="button"
+              ref={pickerButton}
+              disabled={!state}
+              aria-expanded={pickerOpen}
+              aria-controls="tool-picker"
+              onClick={() => { if (pickerOpen) closePicker(); else setPickerOpen(true); }}
+            >
+              <Icon name="search" size={15} />
+              {t('tools')}
+              <Icon name="chevrons" size={14} />
+            </button>
+          </PopupToolbar>
+          {state?.showQuickSwitcher && (
+            <nav
+              aria-label={t('quickSwitcherLabel')}
+              className="flex flex-wrap items-center gap-1.5 border-t border-line px-4 py-2"
+            >
+              {toolRegistry.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={item.id === tool?.id}
+                  className="button min-h-8 flex-1 px-2 py-1 text-xs"
+                  onClick={() => {
+                    openTool(item.id);
+                    if (pickerOpen) closePicker(false);
+                  }}
+                >
+                  <Icon name={item.icon} size={14} />
+                  <span className="truncate">{t(item.shortNameKey)}</span>
+                </button>
+              ))}
+            </nav>
           )}
+          <div id="tool-picker" hidden={!pickerOpen} className="border-t border-line px-4 py-3">
+            {pickerOpen && (
+              <>
+                <input
+                  ref={searchField}
+                  className="field"
+                  type="search"
+                  aria-label={t('searchTools')}
+                  placeholder={t('searchTools')}
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+                <ul className="mt-2 grid gap-1">
+                  {options.map((option) => (
+                    <li key={option.id}>
+                      <button
+                        type="button"
+                        aria-pressed={option.id === tool?.id}
+                        className="button w-full justify-start py-2 text-left"
+                        onClick={() => selectToolFromPicker(option.id)}
+                      >
+                        <Icon name={option.icon} size={19} />
+                        <span className="flex-1">
+                          <span className="block">{t(option.nameKey)}</span>
+                          <span className="block font-normal text-muted">{t(option.descKey)}</span>
+                        </span>
+                        {option.id === tool?.id && <Icon name="check" size={15} />}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {options.length === 0 && (
+                  <p className="px-2 py-1 text-muted" role="status">{t('noTools')}</p>
+                )}
+                <div className="mt-2.5 border-t border-line pt-2.5">
+                  <label className="flex cursor-pointer items-center gap-2 text-xs text-muted select-none">
+                    <input
+                      type="checkbox"
+                      className="size-3.5 accent-accent"
+                      checked={state?.showQuickSwitcher ?? false}
+                      onChange={(event) => toggleQuickSwitcher(event.currentTarget.checked)}
+                    />
+                    <span>{t('showQuickSwitcher')}</span>
+                  </label>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className="grid gap-3 px-4 pt-3.5 pb-4">
+      <main className={`grid gap-3 ${isTabView ? 'mx-auto w-full max-w-3xl px-4 py-6 sm:px-6' : 'px-4 pt-3.5 pb-4'}`}>
         {tool && state ? (
           <>
-            <h1 className="text-lg font-bold tracking-tight">{t(tool.nameKey)}</h1>
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="text-lg font-bold tracking-tight">{t(tool.nameKey)}</h1>
+              {!isTabView && (
+                <button
+                  aria-label={t('openInNewTab')}
+                  className="button button-plain min-h-8 px-2 py-1 text-xs"
+                  onClick={() => void expandToTab()}
+                  title={t('openInNewTab')}
+                  type="button"
+                >
+                  <Icon name="maximize" size={14} />
+                  {t('openInNewTabShort')}
+                </button>
+              )}
+            </div>
             <ErrorBoundary key={`${tool.id}-${state.launchNonce}`}>
               <Suspense fallback={<LoadingTool />}>
                 <tool.component
@@ -193,6 +241,7 @@ export function App() {
                   launchText={state.launchText}
                   currentPageUrl={state.currentPageUrl}
                   openTool={openTool}
+                  reportDraft={reportDraft}
                 />
               </Suspense>
             </ErrorBoundary>

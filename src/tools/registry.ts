@@ -7,6 +7,7 @@ export interface ToolProps {
   readonly launchText?: string;
   readonly currentPageUrl: string;
   readonly openTool: (toolId: ToolId, launchText?: string) => void;
+  readonly reportDraft?: (text: string) => void;
 }
 
 export interface ToolDefinition {

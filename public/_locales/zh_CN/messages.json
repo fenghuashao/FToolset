@@ -71,6 +71,12 @@
   "quickSwitcherLabel": {
     "message": "快捷切换工具"
   },
+  "openInNewTab": {
+    "message": "在新标签页放大使用"
+  },
+  "openInNewTabShort": {
+    "message": "放大"
+  },
   "loadingTool": {
     "message": "正在加载工具…"
   },

@@ -12,7 +12,7 @@ FToolset uses the temporary access Chrome grants when the user invokes the exten
 
 ## `storage`
 
-FToolset stores the last selected tool and the optional quick-switcher bar display preference in local Chrome extension storage. Session storage temporarily passes text or a link chosen from a context menu along with the target tool ID to the popup, which consumes and removes it immediately. Neither storage area is synced to an account or sent to a server.
+FToolset stores the last selected tool and the optional quick-switcher bar display preference in local Chrome extension storage. Session storage temporarily passes context-menu text/links or the active draft when expanding into a full extension tab, and removes it immediately after reading. Neither storage area is synced to an account or sent to a server.
 
 ## `contextMenus`
 
