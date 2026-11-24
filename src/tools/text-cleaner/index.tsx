@@ -60,9 +60,6 @@ export default function TextCleaner({ launchText }: ToolProps) {
   }, [toast]);
 
   function handleInputChange(next: string) {
-    if (text === '' && originalText === '' && next !== '') {
-      setOriginalText(next);
-    }
     setText(next);
   }
 
@@ -71,6 +68,9 @@ export default function TextCleaner({ launchText }: ToolProps) {
     if (next === text) {
       setToast({ key: 'textNoChange', error: false });
       return;
+    }
+    if (originalText === '') {
+      setOriginalText(text);
     }
     setUndoStack((previous) => [...previous.slice(-(MAX_UNDO_STEPS - 1)), text]);
     setText(next);
@@ -84,7 +84,7 @@ export default function TextCleaner({ launchText }: ToolProps) {
   }
 
   function resetToOriginal() {
-    if (text === originalText) return;
+    if (!originalText || text === originalText) return;
     setUndoStack((previous) => [...previous.slice(-(MAX_UNDO_STEPS - 1)), text]);
     setText(originalText);
   }
@@ -95,7 +95,7 @@ export default function TextCleaner({ launchText }: ToolProps) {
       setUndoStack((previous) => [...previous.slice(-(MAX_UNDO_STEPS - 1)), text]);
     }
     setText('');
-    setOriginalText('');
+    setOriginalText(initial);
   }
 
   async function copyResult() {

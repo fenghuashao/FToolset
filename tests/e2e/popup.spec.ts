@@ -568,4 +568,24 @@ test('routes queued text-cleaner launches directly and avoids prefilling active 
 
   await popup.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(textArea).toHaveValue('  Hello   world  \nSecond   line  ');
+  await popup.getByRole('button', { name: 'Reset', exact: true }).click();
+  await expect(textArea).toHaveValue(messy);
+
+  // Manual typing from an empty field should snapshot the full pre-transform text, not the first character.
+  await extension.worker.evaluate(async () => {
+    await chrome.storage.local.set({ lastToolId: 'text-cleaner' });
+  });
+  const manualPopup = await openPopup(extension);
+  const manualArea = manualPopup.getByRole('textbox', { name: 'Text', exact: true });
+  const resetBtn = manualPopup.getByRole('button', { name: 'Reset', exact: true });
+  await manualArea.pressSequentially('foo   bar');
+  await expect(resetBtn).toBeDisabled();
+  await manualPopup.getByRole('button', { name: 'Clean spaces', exact: true }).click();
+  await expect(manualArea).toHaveValue('foo bar');
+  await manualPopup.getByText('English letter case', { exact: true }).click();
+  await manualPopup.getByRole('button', { name: 'UPPERCASE', exact: true }).click();
+  await expect(manualArea).toHaveValue('FOO BAR');
+  await expect(resetBtn).toBeEnabled();
+  await resetBtn.click();
+  await expect(manualArea).toHaveValue('foo   bar');
 });
