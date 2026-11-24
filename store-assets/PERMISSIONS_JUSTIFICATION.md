@@ -4,7 +4,7 @@
 
 ## Single purpose
 
-FToolset is an offline Chrome toolbar utility for preparing web links and text before copying or sharing. Users can generate or decode QR codes, strip common tracking parameters from links, and count or clean copied text entirely on their device.
+FToolset is an offline Chrome toolbar utility for preparing web links, text, and screen colors before copying or sharing. Users can generate or decode QR codes, strip common tracking parameters from links, count or clean copied text, and pick screen colors with contrast checks entirely on their device.
 
 ## `activeTab`
 
@@ -12,7 +12,7 @@ FToolset uses the temporary access Chrome grants when the user invokes the exten
 
 ## `storage`
 
-FToolset stores the last selected tool, quick-bar visibility, and pinned quick-bar tool IDs in local Chrome extension storage. Session storage temporarily passes context-menu text/links or the active draft when expanding into a full extension tab, and removes it immediately after reading. Neither storage area is synced to an account or sent to a server.
+FToolset stores the last selected tool, quick-bar visibility, pinned quick-bar tool IDs, and Color picker recent/favorite color swatches in local Chrome extension storage. Session storage temporarily passes context-menu text/links or the active draft when expanding into a full extension tab, and removes it immediately after reading. Neither storage area is synced to an account or sent to a server.
 
 ## `contextMenus`
 
@@ -20,4 +20,4 @@ FToolset adds Chrome context menu commands for links (generate QR code, clean tr
 
 ## Remote code
 
-Select **No**. The extension packages all executable code and dependencies in the ZIP. QR encoding/decoding, link cleaning, and text processing run entirely offline in the browser without loading remotely hosted code.
+Select **No**. The extension packages all executable code and dependencies in the ZIP. QR encoding/decoding, link cleaning, text processing, and color picking/contrast calculations run entirely offline in the browser without loading remotely hosted code.

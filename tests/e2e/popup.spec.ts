@@ -449,12 +449,13 @@ test('shows pinned quick bar by default, supports corner search, and customizes 
   const popup = await openPopup(extension);
   await popup.setViewportSize({ width: 400, height: 600 });
 
-  // Quick bar is visible by default on one non-overflowing row.
+  // Quick bar is visible by default on one non-overflowing row with all 4 tools pinned.
   const quickNav = popup.getByRole('navigation', { name: 'Quick tool bar', exact: true });
   await expect(quickNav).toBeVisible();
-  await expect(quickNav.getByRole('button', { name: 'QR Code', exact: true })).toBeVisible();
+  await expect(quickNav.getByRole('button', { name: 'QR', exact: true })).toBeVisible();
   await expect(quickNav.getByRole('button', { name: 'Link', exact: true })).toBeVisible();
   await expect(quickNav.getByRole('button', { name: 'Text', exact: true })).toBeVisible();
+  await expect(quickNav.getByRole('button', { name: 'Color', exact: true })).toBeVisible();
   await expect.poll(() => popup.evaluate(() => document.body.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
   // Top-right corner Search expands in-place on Row 1 without shifting header height.
@@ -497,7 +498,7 @@ test('shows pinned quick bar by default, supports corner search, and customizes 
   await popup.getByRole('button', { name: 'Text Move earlier', exact: true }).click();
   const reopened = await openPopup(extension);
   const reopenedNav = reopened.getByRole('navigation', { name: 'Quick tool bar', exact: true });
-  await expect(reopenedNav.locator('div button')).toHaveText(['Text', 'QR Code']);
+  await expect(reopenedNav.locator('div button')).toHaveText(['Text', 'QR', 'Color']);
 
   // Hiding the quick bar persists, while inline Search keeps a compact All tools button in Row 1.
   await reopenedNav.getByRole('button', { name: 'All tools', exact: true }).click();
@@ -660,4 +661,73 @@ test('expands into a full tab with draft handoff, clean wide layout, and session
   await expect(fullTab.getByRole('button', { name: 'Open in full tab', exact: true })).toHaveCount(0);
   await expect.poll(() => fullTab.evaluate(() => document.body.clientWidth)).toBeGreaterThan(600);
   expect(await extension.worker.evaluate(() => chrome.storage.session.get('pendingTabHandoff'))).toEqual({});
+});
+
+test('picks screen colors via EyeDropper, handles Esc cancel, checks WCAG contrast, and persists palettes locally', async ({ extension }) => {
+  const popup = await extension.context.newPage();
+  await popup.setViewportSize({ width: 400, height: 600 });
+  await popup.addInitScript(() => {
+    let pickAttempt = 0;
+    class MockEyeDropper {
+      async open() {
+        pickAttempt += 1;
+        if (pickAttempt === 1) return { sRGBHex: '#10b981' };
+        throw new DOMException('The user canceled the selection.', 'AbortError');
+      }
+    }
+    Object.defineProperty(window, 'EyeDropper', { value: MockEyeDropper, configurable: true });
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+      value: async (text: string) => {
+        document.documentElement.dataset.copiedColor = text;
+      },
+      configurable: true,
+    });
+  });
+  await popup.goto(extension.popupUrl);
+
+  await popup.getByRole('navigation', { name: 'Quick tool bar', exact: true })
+    .getByRole('button', { name: 'Color', exact: true })
+    .click();
+  await expect(popup.getByRole('heading', { name: 'Color picker', exact: true })).toBeVisible();
+  await expect.poll(() => popup.evaluate(() => document.body.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+
+  // First screen pick succeeds, updates formats, copies HEX, and records Recent.
+  await popup.getByRole('button', { name: 'Pick from screen', exact: true }).click();
+  const colorInput = popup.getByRole('textbox', { name: 'Color value', exact: true });
+  await expect(colorInput).toHaveValue('#10B981');
+  await expect(popup.locator('html')).toHaveAttribute('data-copied-color', '#10B981');
+  await expect(popup.getByText('rgb(16, 185, 129)', { exact: true })).toBeVisible();
+  await expect(popup.getByText('hsl(160, 84%, 39%)', { exact: true })).toBeVisible();
+
+  // Second screen pick rejects with AbortError (Esc cancel): preserves #10B981 with no error alert.
+  await popup.getByRole('button', { name: 'Pick from screen', exact: true }).click();
+  await expect(colorInput).toHaveValue('#10B981');
+  await expect(popup.getByRole('alert')).toHaveCount(0);
+
+  // Star #10B981 into Favorites and copy RGB format.
+  await popup.getByRole('button', { name: 'Save to favorites', exact: true }).click();
+  await popup.getByRole('button', { name: 'Copy RGB', exact: true }).click();
+  await expect(popup.locator('html')).toHaveAttribute('data-copied-color', 'rgb(16, 185, 129)');
+
+  // Manual input accepts shorthand hex and shows WCAG 21.00:1 contrast for black.
+  await colorInput.fill('#000');
+  await colorInput.press('Enter');
+  await expect(colorInput).toHaveValue('#000000');
+  await expect(popup.getByText('21.00:1', { exact: true })).toBeVisible();
+
+  // Reopening popup restores most recent color and local Favorites/Recent lists.
+  const reopened = await openPopup(extension);
+  await reopened.setViewportSize({ width: 400, height: 600 });
+  await expect(reopened.getByRole('heading', { name: 'Color picker', exact: true })).toBeVisible();
+  await expect(reopened.getByRole('textbox', { name: 'Color value', exact: true })).toHaveValue('#000000');
+  await expect(reopened.getByRole('button', { name: '#10B981', exact: true }).first()).toBeVisible();
+
+  // Expanding to full tab hands off the currently active color cleanly.
+  const [fullTab] = await Promise.all([
+    extension.context.waitForEvent('page'),
+    reopened.getByRole('button', { name: 'Open in full tab', exact: true }).click(),
+  ]);
+  await fullTab.setViewportSize({ width: 1024, height: 720 });
+  await expect(fullTab.getByRole('heading', { name: 'Color picker', exact: true })).toBeVisible();
+  await expect(fullTab.getByRole('textbox', { name: 'Color value', exact: true })).toHaveValue('#000000');
 });

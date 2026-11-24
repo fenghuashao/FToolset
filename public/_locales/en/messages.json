@@ -6,7 +6,7 @@
     "message": "FToolset"
   },
   "extensionDescription": {
-    "message": "Offline QR code generator & decoder, link tracker cleaner, and text cleaner with word counter in your Chrome toolbar."
+    "message": "Offline QR code generator & decoder, link cleaner, text cleaner, and screen color picker in your Chrome toolbar."
   },
   "rateExtension": {
     "message": "Rate on Chrome Web Store"
@@ -33,7 +33,7 @@
     "message": "QR code generator"
   },
   "toolQrShortName": {
-    "message": "QR Code"
+    "message": "QR"
   },
   "toolQrDescription": {
     "message": "Generate or decode QR codes from links, text, or images."
@@ -55,6 +55,15 @@
   },
   "toolTextDescription": {
     "message": "Count words and clean spaces, blank lines, or PDF line breaks."
+  },
+  "toolColorName": {
+    "message": "Color picker"
+  },
+  "toolColorShortName": {
+    "message": "Color"
+  },
+  "toolColorDescription": {
+    "message": "Pick any pixel color on screen, copy HEX/RGB/HSL, and check text contrast."
   },
   "tools": {
     "message": "Tools"
@@ -451,5 +460,107 @@
   },
   "textNoChange": {
     "message": "Text is already clean."
+  },
+  "colorPickScreen": {
+    "message": "Pick from screen"
+  },
+  "colorPicking": {
+    "message": "Picking… (Esc to cancel)"
+  },
+  "colorUnsupported": {
+    "message": "Screen eyedropper is unavailable in this browser. Use the color input below."
+  },
+  "colorPickError": {
+    "message": "Could not capture a color from screen. Try again or use the color input below."
+  },
+  "colorNativePicker": {
+    "message": "Adjust color"
+  },
+  "colorFavoriteAdd": {
+    "message": "Save to favorites"
+  },
+  "colorFavoriteRemove": {
+    "message": "Remove from favorites"
+  },
+  "colorInputLabel": {
+    "message": "Color value"
+  },
+  "colorInputPlaceholder": {
+    "message": "#314BD8, rgb(49, 75, 216), or hsl(231, 68%, 52%)"
+  },
+  "colorInputInvalid": {
+    "message": "Enter a valid HEX, RGB, or HSL color."
+  },
+  "colorScreenNote": {
+    "message": "Screen pixels are sampled in sRGB, which may differ slightly from source CSS."
+  },
+  "colorFormatsLabel": {
+    "message": "Color formats"
+  },
+  "colorCopy": {
+    "message": "Copy"
+  },
+  "colorCopied": {
+    "message": "Copied $VALUE$.",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "colorCopyError": {
+    "message": "Could not copy color. Select and copy it manually."
+  },
+  "colorPicked": {
+    "message": "Picked $VALUE$.",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "colorPickedCopied": {
+    "message": "Picked and copied $VALUE$.",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "colorContrastTitle": {
+    "message": "Text readability (WCAG)"
+  },
+  "colorContrastWhite": {
+    "message": "White text"
+  },
+  "colorContrastBlack": {
+    "message": "Black text"
+  },
+  "colorContrastPassAAA": {
+    "message": "AAA"
+  },
+  "colorContrastPassAA": {
+    "message": "AA"
+  },
+  "colorContrastPassLarge": {
+    "message": "AA Large"
+  },
+  "colorContrastFail": {
+    "message": "Low"
+  },
+  "colorFavoritesTitle": {
+    "message": "Favorites"
+  },
+  "colorFavoritesEmpty": {
+    "message": "Star a color to save it locally."
+  },
+  "colorRecentTitle": {
+    "message": "Recent picks"
+  },
+  "colorRecentEmpty": {
+    "message": "Picked colors will appear here."
+  },
+  "colorClearRecent": {
+    "message": "Clear"
   }
 }

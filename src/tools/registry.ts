@@ -26,6 +26,7 @@ export const defaultPinnedToolIds: readonly ToolId[] = [
   TOOL_IDS.qrCode,
   TOOL_IDS.linkCleaner,
   TOOL_IDS.textCleaner,
+  TOOL_IDS.colorPicker,
 ];
 
 export const toolRegistry = [
@@ -58,6 +59,16 @@ export const toolRegistry = [
     category: 'text',
     keywords: ['text', 'word', 'count', 'clean', 'spaces', 'lines', 'pdf', 'case', '文字', '文本', '字数', '统计', '空格', '空行', '断行', '去重', '大小写'],
     component: lazy(() => import('./text-cleaner')),
+  },
+  {
+    id: TOOL_IDS.colorPicker,
+    nameKey: 'toolColorName',
+    shortNameKey: 'toolColorShortName',
+    descKey: 'toolColorDescription',
+    icon: 'eyedropper',
+    category: 'color',
+    keywords: ['color', 'colour', 'picker', 'eyedropper', 'hex', 'rgb', 'hsl', 'wcag', 'contrast', 'palette', 'swatch', '取色', '颜色', '色值', '配色', '吸管', '对比度', '色板'],
+    component: lazy(() => import('./color-picker')),
   },
 ] as const satisfies readonly ToolDefinition[];
 

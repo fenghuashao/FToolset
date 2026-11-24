@@ -18,6 +18,7 @@ describe('tool registry', () => {
       TOOL_IDS.qrCode,
       TOOL_IDS.linkCleaner,
       TOOL_IDS.textCleaner,
+      TOOL_IDS.colorPicker,
     ]);
     expect(getTool(defaultToolId).id).toBe('qr-code');
   });
@@ -36,6 +37,8 @@ describe('tool registry', () => {
     expect(ids('追踪 参数', zh)).toEqual([TOOL_IDS.linkCleaner]);
     expect(ids('word count', en)).toEqual([TOOL_IDS.textCleaner]);
     expect(ids('字数 断行', zh)).toEqual([TOOL_IDS.textCleaner]);
+    expect(ids('eyedropper wcag', en)).toEqual([TOOL_IDS.colorPicker]);
+    expect(ids('取色 对比度', zh)).toEqual([TOOL_IDS.colorPicker]);
     expect(ids('  ', en)).toEqual(toolRegistry.map((tool) => tool.id));
     expect(ids('timestamp', en)).toEqual([]);
   });

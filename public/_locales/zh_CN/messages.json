@@ -6,7 +6,7 @@
     "message": "FToolset"
   },
   "extensionDescription": {
-    "message": "离线二维码生成与识别、链接追踪参数清理与文字整理字数统计。本机运行、无需账号、零上传。"
+    "message": "离线二维码生成与识别、链接净化、文字整理字数统计与网页取色配色助手。本机运行、无需账号、零上传。"
   },
   "rateExtension": {
     "message": "去商店评分"
@@ -42,7 +42,7 @@
     "message": "链接净化"
   },
   "toolLinkShortName": {
-    "message": "链接净化"
+    "message": "链接"
   },
   "toolLinkDescription": {
     "message": "去除链接中的追踪参数，分享更清爽。"
@@ -51,10 +51,19 @@
     "message": "文字整理"
   },
   "toolTextShortName": {
-    "message": "文字整理"
+    "message": "文字"
   },
   "toolTextDescription": {
     "message": "统计字数并清理空格、空行、PDF 断行与大小写。"
+  },
+  "toolColorName": {
+    "message": "网页取色"
+  },
+  "toolColorShortName": {
+    "message": "取色"
+  },
+  "toolColorDescription": {
+    "message": "吸取屏幕任意像素颜色，复制 HEX/RGB/HSL 并检查文字对比度。"
   },
   "tools": {
     "message": "工具"
@@ -451,5 +460,107 @@
   },
   "textNoChange": {
     "message": "内容无需调整。"
+  },
+  "colorPickScreen": {
+    "message": "从屏幕取色"
+  },
+  "colorPicking": {
+    "message": "正在取色（按 Esc 取消）…"
+  },
+  "colorUnsupported": {
+    "message": "当前浏览器环境不支持屏幕吸管，可使用下方色盘或手动输入色值。"
+  },
+  "colorPickError": {
+    "message": "屏幕取色失败，请重试或使用下方色盘调整。"
+  },
+  "colorNativePicker": {
+    "message": "打开色盘微调"
+  },
+  "colorFavoriteAdd": {
+    "message": "收藏此颜色"
+  },
+  "colorFavoriteRemove": {
+    "message": "取消收藏"
+  },
+  "colorInputLabel": {
+    "message": "色值"
+  },
+  "colorInputPlaceholder": {
+    "message": "输入 #HEX、rgb(...) 或 hsl(...)"
+  },
+  "colorInputInvalid": {
+    "message": "请输入有效的 HEX、RGB 或 HSL 色值。"
+  },
+  "colorScreenNote": {
+    "message": "取色采样自屏幕渲染像素（sRGB），可能与网页原始 CSS 色值略有差异。"
+  },
+  "colorFormatsLabel": {
+    "message": "色值格式"
+  },
+  "colorCopy": {
+    "message": "复制"
+  },
+  "colorCopied": {
+    "message": "已复制 $VALUE$。",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "colorCopyError": {
+    "message": "无法自动复制，请手动复制色值。"
+  },
+  "colorPicked": {
+    "message": "已取色 $VALUE$。",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "colorPickedCopied": {
+    "message": "已取色并复制 $VALUE$。",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "colorContrastTitle": {
+    "message": "文字可读性（WCAG 2.1）"
+  },
+  "colorContrastWhite": {
+    "message": "白色文字"
+  },
+  "colorContrastBlack": {
+    "message": "黑色文字"
+  },
+  "colorContrastPassAAA": {
+    "message": "AAA"
+  },
+  "colorContrastPassAA": {
+    "message": "AA"
+  },
+  "colorContrastPassLarge": {
+    "message": "AA 大字"
+  },
+  "colorContrastFail": {
+    "message": "偏低"
+  },
+  "colorFavoritesTitle": {
+    "message": "收藏色板"
+  },
+  "colorFavoritesEmpty": {
+    "message": "点击星标可将常用颜色保存在本机。"
+  },
+  "colorRecentTitle": {
+    "message": "最近取色"
+  },
+  "colorRecentEmpty": {
+    "message": "吸取或确认的颜色会显示在这里。"
+  },
+  "colorClearRecent": {
+    "message": "清空"
   }
 }
