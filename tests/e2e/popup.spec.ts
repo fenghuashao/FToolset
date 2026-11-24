@@ -457,14 +457,35 @@ test('shows pinned quick bar by default, supports corner search, and customizes 
   await expect(quickNav.getByRole('button', { name: 'Text', exact: true })).toBeVisible();
   await expect.poll(() => popup.evaluate(() => document.body.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
-  // Top-right corner Search opens compact search without dumping the full tool list when empty.
+  // Top-right corner Search expands in-place on Row 1 without shifting header height.
+  const header = popup.locator('header');
+  const headerHeightBefore = await header.evaluate((element) => Math.round(element.getBoundingClientRect().height));
   await popup.getByRole('button', { name: 'Search tools', exact: true }).click();
   const searchInput = popup.getByRole('searchbox', { name: 'Search tools', exact: true });
   await expect(searchInput).toBeFocused();
-  await expect(popup.locator('#tool-search ul')).toHaveCount(0);
+  await expect(popup.locator('#tool-search-results')).toHaveCount(0);
+  const headerHeightInline = await header.evaluate((element) => Math.round(element.getBoundingClientRect().height));
+  expect(headerHeightInline).toBe(headerHeightBefore);
+
+  // Escape closes inline search and restores focus to the top-right Search trigger.
+  await searchInput.press('Escape');
+  await expect(popup.getByRole('button', { name: 'Search tools', exact: true })).toBeFocused();
+
+  // Typing renders floating results without changing header height, and Enter jumps to the top match.
+  await popup.getByRole('button', { name: 'Search tools', exact: true }).click();
   await searchInput.fill('utm');
+  await expect(popup.locator('#tool-search-results ul li')).toHaveCount(1);
+  const headerHeightOverlay = await header.evaluate((element) => Math.round(element.getBoundingClientRect().height));
+  expect(headerHeightOverlay).toBe(headerHeightBefore);
   await searchInput.press('Enter');
   await expect(popup.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
+  await expect(popup.locator('#tool-search')).toHaveCount(0);
+
+  // Clicking outside the header dismisses inline search.
+  await popup.getByRole('button', { name: 'Search tools', exact: true }).click();
+  await expect(searchInput).toBeFocused();
+  await popup.locator('main h1').click();
+  await expect(popup.locator('#tool-search')).toHaveCount(0);
 
   // Open dedicated All tools view from quick bar right corner, unpin Link, and reorder Text first.
   await quickNav.getByRole('button', { name: 'All tools', exact: true }).click();
@@ -478,7 +499,7 @@ test('shows pinned quick bar by default, supports corner search, and customizes 
   const reopenedNav = reopened.getByRole('navigation', { name: 'Quick tool bar', exact: true });
   await expect(reopenedNav.locator('div button')).toHaveText(['Text', 'QR Code']);
 
-  // Hiding the quick bar persists, while corner Search still offers All tools access.
+  // Hiding the quick bar persists, while inline Search keeps a compact All tools button in Row 1.
   await reopenedNav.getByRole('button', { name: 'All tools', exact: true }).click();
   await reopened.getByRole('checkbox', { name: 'Show quick bar', exact: true }).uncheck();
   await expect(reopened.getByRole('navigation', { name: 'Quick tool bar', exact: true })).toHaveCount(0);

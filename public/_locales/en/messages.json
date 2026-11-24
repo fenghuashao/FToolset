@@ -65,11 +65,11 @@
   "searchTools": {
     "message": "Search tools"
   },
-  "searchToolsPlaceholder": {
-    "message": "Search tools by name or keyword…"
+  "closeSearch": {
+    "message": "Close search"
   },
-  "searchEmptyHint": {
-    "message": "Type a keyword to jump to a tool, or browse all tools."
+  "searchToolsPlaceholder": {
+    "message": "Search tools or keywords…"
   },
   "noTools": {
     "message": "No matching tools."

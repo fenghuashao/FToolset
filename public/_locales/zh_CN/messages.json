@@ -65,11 +65,11 @@
   "searchTools": {
     "message": "搜索工具"
   },
-  "searchToolsPlaceholder": {
-    "message": "输入工具名或关键词（回车直达）…"
+  "closeSearch": {
+    "message": "关闭搜索"
   },
-  "searchEmptyHint": {
-    "message": "输入关键词直达工具，或进入全部工具管理快捷栏。"
+  "searchToolsPlaceholder": {
+    "message": "输入工具名或关键词…"
   },
   "noTools": {
     "message": "没有找到匹配的工具。"

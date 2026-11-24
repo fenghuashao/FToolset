@@ -61,8 +61,10 @@ export function App({ isTabView = false }: { readonly isTabView?: boolean }) {
   const [state, setState] = useState<PopupState | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const headerRef = useRef<HTMLElement>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchField = useRef<HTMLInputElement>(null);
+  const restoreSearchFocus = useRef(false);
   const draftRef = useRef<string | undefined>(undefined);
   const tool = state && getTool(state.toolId);
   const trimmedQuery = query.trim();
@@ -77,7 +79,26 @@ export function App({ isTabView = false }: { readonly isTabView?: boolean }) {
   }, [isTabView]);
 
   useEffect(() => {
-    if (searchOpen) searchField.current?.focus();
+    if (searchOpen) {
+      searchField.current?.focus();
+      return;
+    }
+    if (restoreSearchFocus.current) {
+      restoreSearchFocus.current = false;
+      searchButton.current?.focus();
+    }
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      if (headerRef.current?.contains(event.target as Node)) return;
+      restoreSearchFocus.current = false;
+      setSearchOpen(false);
+      setQuery('');
+    }
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
   }, [searchOpen]);
 
   useEffect(() => {
@@ -105,9 +126,9 @@ export function App({ isTabView = false }: { readonly isTabView?: boolean }) {
   }, [isTabView, state, tool]);
 
   function closeSearch(restoreFocus = true) {
+    restoreSearchFocus.current = restoreFocus;
     setSearchOpen(false);
     setQuery('');
-    if (restoreFocus) searchButton.current?.focus();
   }
 
   const reportDraft = useCallback((value: string) => {
@@ -143,6 +164,7 @@ export function App({ isTabView = false }: { readonly isTabView?: boolean }) {
 
   function returnToActiveTool() {
     setState((previous) => previous ? { ...previous, activeView: 'tool' } : previous);
+    if (searchOpen) closeSearch(false);
   }
 
   function toggleQuickSwitcher(enabled: boolean) {
@@ -200,59 +222,80 @@ export function App({ isTabView = false }: { readonly isTabView?: boolean }) {
   return (
     <>
       <header
+        ref={headerRef}
         className="border-b border-line bg-surface"
         onKeyDown={(event) => { if (event.key === 'Escape' && searchOpen) closeSearch(); }}
       >
         <div className={shellContainer}>
-          <PopupToolbar>
-            <button
-              aria-controls="tool-search"
-              aria-expanded={searchOpen}
-              aria-label={t('searchTools')}
-              className="button"
-              disabled={!state}
-              onClick={() => { if (searchOpen) closeSearch(); else setSearchOpen(true); }}
-              ref={searchButton}
-              title={t('searchTools')}
-              type="button"
-            >
-              <Icon name="search" size={15} />
-              {t('search')}
-            </button>
-          </PopupToolbar>
-
-          <div id="tool-search" hidden={!searchOpen} className="border-t border-line px-4 py-2.5">
-            {searchOpen && (
-              <div className="grid gap-2">
-                <input
-                  aria-label={t('searchTools')}
-                  className="field"
-                  onChange={(event) => setQuery(event.currentTarget.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' && searchResults[0]) {
-                      event.preventDefault();
-                      openTool(searchResults[0].id);
-                      closeSearch(false);
-                    }
-                  }}
-                  placeholder={t('searchToolsPlaceholder')}
-                  ref={searchField}
-                  type="search"
-                  value={query}
-                />
-                {trimmedQuery === '' ? (
-                  <div className="flex items-center justify-between gap-2 text-xs text-muted">
-                    <span>{t('searchEmptyHint')}</span>
+          <div className="relative">
+            <PopupToolbar
+              searchBar={searchOpen ? (
+                <div id="tool-search" className="flex min-w-0 flex-1 items-center gap-1.5">
+                  <div className="relative flex min-w-0 flex-1 items-center">
+                    <span className="pointer-events-none absolute left-2.5 text-muted">
+                      <Icon name="search" size={14} />
+                    </span>
+                    <input
+                      aria-label={t('searchTools')}
+                      className="field h-9 py-1.5 pl-8 pr-2.5 text-[13px] focus-visible:outline-offset-0 [&::-webkit-search-cancel-button]:hidden"
+                      onChange={(event) => setQuery(event.currentTarget.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && searchResults[0]) {
+                          event.preventDefault();
+                          openTool(searchResults[0].id);
+                          closeSearch(false);
+                        }
+                      }}
+                      placeholder={t('searchToolsPlaceholder')}
+                      ref={searchField}
+                      type="search"
+                      value={query}
+                    />
+                  </div>
+                  {!state?.showQuickSwitcher && (
                     <button
-                      className="button button-plain min-h-7 shrink-0 px-2 py-0.5 text-xs text-accent"
+                      aria-label={t('allTools')}
+                      className="button button-plain shrink-0 px-2"
                       onClick={openCatalog}
+                      title={t('allTools')}
                       type="button"
                     >
-                      <Icon name="grid" size={13} />
-                      {t('allTools')}
+                      <Icon name="grid" size={15} />
                     </button>
-                  </div>
-                ) : searchResults.length > 0 ? (
+                  )}
+                  <button
+                    aria-label={t('closeSearch')}
+                    className="button shrink-0 px-2.5"
+                    onClick={() => closeSearch()}
+                    title={t('closeSearch')}
+                    type="button"
+                  >
+                    <Icon name="close" size={15} />
+                  </button>
+                </div>
+              ) : undefined}
+            >
+              <button
+                aria-expanded={false}
+                aria-label={t('searchTools')}
+                className="button"
+                disabled={!state}
+                onClick={() => setSearchOpen(true)}
+                ref={searchButton}
+                title={t('searchTools')}
+                type="button"
+              >
+                <Icon name="search" size={15} />
+                {t('search')}
+              </button>
+            </PopupToolbar>
+
+            {searchOpen && trimmedQuery !== '' && (
+              <div
+                id="tool-search-results"
+                className="absolute inset-x-0 top-full z-20 max-h-72 overflow-y-auto border-y border-line bg-surface px-4 py-2.5 shadow-lg sm:inset-x-4 sm:rounded-b-xl sm:border-x"
+              >
+                {searchResults.length > 0 ? (
                   <ul className="grid gap-1">
                     {searchResults.map((option) => (
                       <li key={option.id}>
