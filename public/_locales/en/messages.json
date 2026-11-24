@@ -59,17 +59,66 @@
   "tools": {
     "message": "Tools"
   },
+  "search": {
+    "message": "Search"
+  },
   "searchTools": {
     "message": "Search tools"
+  },
+  "searchToolsPlaceholder": {
+    "message": "Search tools by name or keyword…"
+  },
+  "searchEmptyHint": {
+    "message": "Type a keyword to jump to a tool, or browse all tools."
   },
   "noTools": {
     "message": "No matching tools."
   },
+  "allTools": {
+    "message": "All tools"
+  },
+  "allToolsShort": {
+    "message": "All"
+  },
+  "backToTool": {
+    "message": "Back"
+  },
   "showQuickSwitcher": {
-    "message": "Show quick tool bar"
+    "message": "Show quick bar"
   },
   "quickSwitcherLabel": {
-    "message": "Quick tool switcher"
+    "message": "Quick tool bar"
+  },
+  "pinnedCount": {
+    "message": "Quick bar ($USED$/$MAX$)",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      }
+    }
+  },
+  "pinTool": {
+    "message": "Pin to quick bar"
+  },
+  "unpinTool": {
+    "message": "Pinned"
+  },
+  "pinLimitReached": {
+    "message": "Quick bar is full (max $MAX$). Unpin another tool first.",
+    "placeholders": {
+      "max": {
+        "content": "$1"
+      }
+    }
+  },
+  "moveEarlier": {
+    "message": "Move earlier"
+  },
+  "moveLater": {
+    "message": "Move later"
   },
   "openInNewTab": {
     "message": "Open in full tab"

@@ -5,10 +5,11 @@ import {
   getShareablePageUrl,
   isSafeHttpUrl,
   parsePendingLaunch,
+  parsePinnedToolIds,
   parseTabHandoff,
 } from '../../src/shared/launch';
 import { TOOL_IDS } from '../../src/shared/tool-ids';
-import { defaultToolId, getTool, searchTools, toolRegistry } from '../../src/tools/registry';
+import { defaultPinnedToolIds, defaultToolId, getTool, searchTools, toolRegistry } from '../../src/tools/registry';
 
 describe('tool registry', () => {
   it('registers unique tool IDs and names the default tool', () => {
@@ -90,5 +91,14 @@ describe('URL and launch helpers', () => {
       sourceUrl: undefined,
     });
     expect(parseTabHandoff({ toolId: 'invalid' })).toBeNull();
+  });
+
+  it('sanitizes pinned quick-bar tool IDs with deduplication and fallback', () => {
+    expect(parsePinnedToolIds(undefined, defaultPinnedToolIds)).toEqual(defaultPinnedToolIds);
+    expect(parsePinnedToolIds([], defaultPinnedToolIds)).toEqual([]);
+    expect(parsePinnedToolIds(['text-cleaner', 'unknown', 'text-cleaner', 'qr-code'], defaultPinnedToolIds)).toEqual([
+      TOOL_IDS.textCleaner,
+      TOOL_IDS.qrCode,
+    ]);
   });
 });

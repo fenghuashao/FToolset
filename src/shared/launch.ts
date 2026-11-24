@@ -2,6 +2,8 @@ import { isToolId, type ToolId } from './tool-ids';
 
 export const lastToolIdKey = 'lastToolId';
 export const quickSwitcherKey = 'showQuickSwitcher';
+export const pinnedToolIdsKey = 'pinnedToolIds';
+export const MAX_PINNED_TOOLS = 4;
 export const pendingLaunchKey = 'pendingToolLaunch';
 export const tabHandoffKey = 'pendingTabHandoff';
 export const consumePendingLaunchMessage = 'consume-pending-tool-launch';
@@ -85,6 +87,22 @@ export async function consumeTabHandoff(): Promise<TabHandoff | null> {
   } catch {
     return null;
   }
+}
+
+export function parsePinnedToolIds(
+  value: unknown,
+  fallback: readonly ToolId[],
+): ToolId[] {
+  if (!Array.isArray(value)) return [...fallback].slice(0, MAX_PINNED_TOOLS);
+  const seen = new Set<ToolId>();
+  const result: ToolId[] = [];
+  for (const item of value) {
+    if (!isToolId(item) || seen.has(item)) continue;
+    seen.add(item);
+    result.push(item);
+    if (result.length >= MAX_PINNED_TOOLS) break;
+  }
+  return result;
 }
 
 export async function consumePendingLaunch(): Promise<ToolLaunch | null> {

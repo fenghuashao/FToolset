@@ -59,17 +59,66 @@
   "tools": {
     "message": "工具"
   },
+  "search": {
+    "message": "搜索"
+  },
   "searchTools": {
     "message": "搜索工具"
+  },
+  "searchToolsPlaceholder": {
+    "message": "输入工具名或关键词（回车直达）…"
+  },
+  "searchEmptyHint": {
+    "message": "输入关键词直达工具，或进入全部工具管理快捷栏。"
   },
   "noTools": {
     "message": "没有找到匹配的工具。"
   },
+  "allTools": {
+    "message": "全部工具"
+  },
+  "allToolsShort": {
+    "message": "全部"
+  },
+  "backToTool": {
+    "message": "返回"
+  },
   "showQuickSwitcher": {
-    "message": "显示快捷切换栏"
+    "message": "显示快捷栏"
   },
   "quickSwitcherLabel": {
-    "message": "快捷切换工具"
+    "message": "快捷切换栏"
+  },
+  "pinnedCount": {
+    "message": "快捷栏（已固定 $USED$/$MAX$）",
+    "placeholders": {
+      "used": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      }
+    }
+  },
+  "pinTool": {
+    "message": "固定到快捷栏"
+  },
+  "unpinTool": {
+    "message": "已固定"
+  },
+  "pinLimitReached": {
+    "message": "快捷栏最多固定 $MAX$ 个工具，请先取消其他固定项。",
+    "placeholders": {
+      "max": {
+        "content": "$1"
+      }
+    }
+  },
+  "moveEarlier": {
+    "message": "前移"
+  },
+  "moveLater": {
+    "message": "后移"
   },
   "openInNewTab": {
     "message": "在新标签页放大使用"

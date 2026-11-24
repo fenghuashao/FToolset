@@ -22,6 +22,11 @@ export interface ToolDefinition {
 }
 
 export const defaultToolId: ToolId = TOOL_IDS.qrCode;
+export const defaultPinnedToolIds: readonly ToolId[] = [
+  TOOL_IDS.qrCode,
+  TOOL_IDS.linkCleaner,
+  TOOL_IDS.textCleaner,
+];
 
 export const toolRegistry = [
   {

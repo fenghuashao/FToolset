@@ -427,7 +427,8 @@ test.describe('Chinese locale and dark mode', () => {
     const popup = await openPopup(extension);
     await expect(popup.locator('html')).toHaveAttribute('lang', /^zh-/);
     await expect(popup.getByRole('textbox', { name: '内容', exact: true })).toBeVisible();
-    await expect(popup.getByRole('button', { name: '工具', exact: true })).toBeVisible();
+    await expect(popup.getByRole('button', { name: '搜索工具', exact: true })).toBeVisible();
+    await expect(popup.getByRole('navigation', { name: '快捷切换栏', exact: true })).toBeVisible();
     const background = () => popup.locator('body').evaluate((body) => getComputedStyle(body).backgroundColor);
     const darkBackground = await background();
     await popup.emulateMedia({ colorScheme: 'light' });
@@ -444,26 +445,47 @@ test('preserves minimal permissions and strict offline CSP in production manifes
   expect(manifest.content_security_policy?.extension_pages).toContain("connect-src 'none'");
 });
 
-test('keeps quick tool bar off by default and persists when enabled locally', async ({ extension }) => {
+test('shows pinned quick bar by default, supports corner search, and customizes pins in All tools view', async ({ extension }) => {
   const popup = await openPopup(extension);
   await popup.setViewportSize({ width: 400, height: 600 });
 
-  await expect(popup.getByRole('navigation', { name: 'Quick tool switcher', exact: true })).toHaveCount(0);
-  await popup.getByRole('button', { name: 'Tools', exact: true }).click();
-  const toggle = popup.getByRole('checkbox', { name: 'Show quick tool bar', exact: true });
-  await expect(toggle).not.toBeChecked();
-  await toggle.check();
-
-  const quickNav = popup.getByRole('navigation', { name: 'Quick tool switcher', exact: true });
+  // Quick bar is visible by default on one non-overflowing row.
+  const quickNav = popup.getByRole('navigation', { name: 'Quick tool bar', exact: true });
   await expect(quickNav).toBeVisible();
+  await expect(quickNav.getByRole('button', { name: 'QR Code', exact: true })).toBeVisible();
+  await expect(quickNav.getByRole('button', { name: 'Link', exact: true })).toBeVisible();
+  await expect(quickNav.getByRole('button', { name: 'Text', exact: true })).toBeVisible();
   await expect.poll(() => popup.evaluate(() => document.body.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 
-  await quickNav.getByRole('button', { name: 'Link', exact: true }).click();
+  // Top-right corner Search opens compact search without dumping the full tool list when empty.
+  await popup.getByRole('button', { name: 'Search tools', exact: true }).click();
+  const searchInput = popup.getByRole('searchbox', { name: 'Search tools', exact: true });
+  await expect(searchInput).toBeFocused();
+  await expect(popup.locator('#tool-search ul')).toHaveCount(0);
+  await searchInput.fill('utm');
+  await searchInput.press('Enter');
   await expect(popup.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
 
+  // Open dedicated All tools view from quick bar right corner, unpin Link, and reorder Text first.
+  await quickNav.getByRole('button', { name: 'All tools', exact: true }).click();
+  await expect(popup.getByRole('heading', { name: 'All tools', exact: true })).toBeVisible();
+  const linkCard = popup.locator('main li', { hasText: 'Link cleaner' });
+  await linkCard.getByRole('button', { name: 'Pinned', exact: true }).click();
+  await expect(quickNav.getByRole('button', { name: 'Link', exact: true })).toHaveCount(0);
+
+  await popup.getByRole('button', { name: 'Text Move earlier', exact: true }).click();
   const reopened = await openPopup(extension);
-  await expect(reopened.getByRole('navigation', { name: 'Quick tool switcher', exact: true })).toBeVisible();
-  await expect(reopened.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
+  const reopenedNav = reopened.getByRole('navigation', { name: 'Quick tool bar', exact: true });
+  await expect(reopenedNav.locator('div button')).toHaveText(['Text', 'QR Code']);
+
+  // Hiding the quick bar persists, while corner Search still offers All tools access.
+  await reopenedNav.getByRole('button', { name: 'All tools', exact: true }).click();
+  await reopened.getByRole('checkbox', { name: 'Show quick bar', exact: true }).uncheck();
+  await expect(reopened.getByRole('navigation', { name: 'Quick tool bar', exact: true })).toHaveCount(0);
+  await reopened.getByRole('button', { name: 'Back', exact: true }).click();
+  await reopened.getByRole('button', { name: 'Search tools', exact: true }).click();
+  await reopened.locator('#tool-search').getByRole('button', { name: 'All tools', exact: true }).click();
+  await expect(reopened.getByRole('heading', { name: 'All tools', exact: true })).toBeVisible();
 });
 
 test('decodes QR images offline, allows safe links only, and rejects non-QR images', async ({ extension }) => {
@@ -512,8 +534,9 @@ test('cleans tracking parameters, supports restoring a parameter, and hands off 
   const popup = await openPopup(extension);
   await popup.setViewportSize({ width: 400, height: 600 });
 
-  await popup.getByRole('button', { name: 'Tools', exact: true }).click();
-  await popup.getByRole('button', { name: /Link cleaner/ }).click();
+  await popup.getByRole('navigation', { name: 'Quick tool bar', exact: true })
+    .getByRole('button', { name: 'Link', exact: true })
+    .click();
   await expect(popup.getByRole('heading', { name: 'Link cleaner', exact: true })).toBeVisible();
 
   const linkField = popup.getByRole('textbox', { name: 'Link', exact: true });
@@ -594,8 +617,9 @@ test('expands into a full tab with draft handoff, clean wide layout, and session
   const popup = await openPopup(extension);
   await popup.setViewportSize({ width: 400, height: 600 });
 
-  await popup.getByRole('button', { name: 'Tools', exact: true }).click();
-  await popup.getByRole('button', { name: /Text cleaner/ }).click();
+  await popup.getByRole('navigation', { name: 'Quick tool bar', exact: true })
+    .getByRole('button', { name: 'Text', exact: true })
+    .click();
   await expect(popup.getByRole('heading', { name: 'Text cleaner', exact: true })).toBeVisible();
 
   const draft = 'Line one   with spaces\n\nLine two';
