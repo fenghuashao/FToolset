@@ -160,6 +160,13 @@ async function withBrowserAction(extension: ExtensionFixture, tab: Page, inspect
     const target = targetInfos.find((item) => item.url === tab.url());
     if (!target) throw new Error(`Missing CDP tab target for ${tab.url()}`);
 
+    const { targetInfos: initialPages } = await cdp.send('Target.getTargets', {
+      filter: [{ type: 'page' }, { exclude: true }],
+    });
+    const existingPopupIds = new Set(
+      initialPages.filter((page) => page.url === extension.popupUrl).map((page) => page.targetId),
+    );
+
     await cdp.send('Extensions.triggerAction', { id: extension.id, targetId: target.targetId });
     // Chrome exposes the native popup through CDP without creating a Playwright Page.
     let popupId = '';
@@ -167,7 +174,7 @@ async function withBrowserAction(extension: ExtensionFixture, tab: Page, inspect
       const { targetInfos: pages } = await cdp.send('Target.getTargets', {
         filter: [{ type: 'page' }, { exclude: true }],
       });
-      popupId = pages.find((page) => page.url === extension.popupUrl)?.targetId ?? '';
+      popupId = pages.find((page) => page.url === extension.popupUrl && !existingPopupIds.has(page.targetId))?.targetId ?? '';
       return popupId;
     }).not.toBe('');
 
@@ -180,6 +187,14 @@ async function withBrowserAction(extension: ExtensionFixture, tab: Page, inspect
           throw error;
         }
       });
+      // Wait for Chromium to finish tearing down the native popup before returning so a
+      // back-to-back triggerAction cannot toggle or attach to the closing target.
+      await expect.poll(async () => {
+        const { targetInfos: pages } = await cdp.send('Target.getTargets', {
+          filter: [{ type: 'page' }, { exclude: true }],
+        });
+        return pages.some((page) => page.targetId === popupId);
+      }).toBe(false);
     }
   } finally {
     await cdp.detach();
