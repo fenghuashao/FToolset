@@ -1,9 +1,9 @@
 {
   "name": "ftoolset",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
-  "description": "An offline Chrome toolset, starting with a QR code generator.",
+  "description": "An offline Chrome toolset with QR code generator & decoder, link cleaner, text cleaner, and screen color picker.",
   "engines": {
     "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
   },
