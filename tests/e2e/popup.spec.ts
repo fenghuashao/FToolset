@@ -175,7 +175,11 @@ async function withBrowserAction(extension: ExtensionFixture, tab: Page, inspect
     try {
       await inspect(evaluateTarget(cdp, sessionId));
     } finally {
-      await cdp.send('Target.closeTarget', { targetId: popupId });
+      await cdp.send('Target.closeTarget', { targetId: popupId }).catch((error: unknown) => {
+        if (!(error instanceof Error) || !error.message.includes('No target with given id found')) {
+          throw error;
+        }
+      });
     }
   } finally {
     await cdp.detach();
