@@ -64,3 +64,7 @@ Playwright 端到端测试会在 Chromium 中加载 `.output/chrome-mv3` 中的�
 ## 隐私与权限
 
 所有二维码编解码、链接净化、文字处理与屏幕取色均在浏览器本机离线完成，生产 CSP 严格禁止任何外连（`connect-src 'none'`）。扩展仅申请 `activeTab`、`storage`、`contextMenus` 三项最小权限，不使用 Chrome 同步存储，无需账号，也不收集任何使用统计。[隐私政策](store-assets/PRIVACY.md) · [Chrome 权限说明](store-assets/PERMISSIONS_JUSTIFICATION.md) · [第三方许可通知](public/THIRD-PARTY-NOTICES.txt)
+
+## 开源许可
+
+本项目采用 MIT 许可证，详见 [LICENSE](LICENSE)。
